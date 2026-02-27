@@ -37,6 +37,8 @@ def clean_data(file: str, columns_to_remove=[], columns_to_clean=[]) -> pd.DataF
     for column in column_names:
         if 'date' in column.lower():
             df[column] = pd.to_datetime(df[column])
+        if 'beat' in column.lower():
+            df = df[df[column] != -1]
 
     # Remove specified columns
     df_cleaned = df.drop(labels=columns_to_remove, axis='columns')
