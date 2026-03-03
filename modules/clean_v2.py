@@ -1,4 +1,5 @@
 import re
+from typing import Union
 from pathlib import Path
 
 import pandas as pd
@@ -24,7 +25,7 @@ def norm_col(col: str) -> str:
     return col
 
 
-def ensure_parent_dir(file_path: str | Path) -> None:
+def ensure_parent_dir(file_path: Union[str, Path]) -> None:
     """Create parent directory if it does not exist."""
     Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
@@ -33,7 +34,7 @@ def ensure_parent_dir(file_path: str | Path) -> None:
 # Core pipeline
 # ----------------------------
 
-def build_calltype_mapping(mapping_csv_path: str | Path) -> dict:
+def build_calltype_mapping(mapping_csv_path: Union[str, Path]) -> dict:
     """
     Read mapping table CSV and build a dict: CALL_TYPE (key_col) -> category (3rd column).
     Note: Your notebook normalized ONLY the 3rd column name, and used 'call_type' as key.
