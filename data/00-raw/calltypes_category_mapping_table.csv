@@ -1,0 +1,290 @@
+call_type,description,call_type_category
+1016,PRISONER IN CUSTODY,Administrative / Legal Process
+1016PT,PTU (PRISONER TRANSPORT),Administrative / Legal Process
+1021,PHONE YOUR STATION,Service / Non-Emergency Assist
+1021H,PHONE YOUR HOME,Service / Non-Emergency Assist
+10851,AUTO THEFT,Property Crime
+10851E,EVAL-POSS UNREPORTED CAR THEFT,Property Crime
+10851R,CAR THEFT REPORT,Administrative / Legal Process
+10851RR,CAR THEFT RECOVERY REPORT,Administrative / Legal Process
+10852A,VEHICLE ALARM/AUDIBLE,False Alarm / Device
+10852C,VEHICLE CASER,Traffic / Road
+10852R,TAMPERING W/VEH REPORT,Administrative / Legal Process
+1087,MEET OFFICER NON URGENT,Service / Non-Emergency Assist
+11-6SPT,DISCHARGING FIREARM SHOT SPOTTER ACTIVATION,Violence / Person Crime
+7-Nov,PROWLER,Public Order / Disturbance
+8-Nov,PERSON DOWN,Life Safety / Medical
+1110M,REPORT OF CRIME OCCD MEXICO,Administrative / Legal Process
+1111,CHECK THE AREA,Service / Non-Emergency Assist
+1111,CHECK THE AREA,Service / Non-Emergency Assist
+1130,INCOMPLETE PHONE CALL,False Alarm / Device
+1130,INCOMPLETE PHONE CALL,False Alarm / Device
+1131,CALLING FOR HELP,Life Safety / Medical
+1131,CALLING FOR HELP,Life Safety / Medical
+1131A,CALLING FOR HELP-PANIC ALARM,Life Safety / Medical
+1140OD,"AMBULANCE CALL, OVERDOSE",Life Safety / Medical
+1141,AMBULANCE NEEDED,Life Safety / Medical
+1144,CORONER'S CASE,Administrative / Legal Process
+1146,REPORT OF DEATH,Administrative / Legal Process
+1149,TRAFFIC STOP/NO LICENSE,Traffic / Road
+1150,TRAFFIC STOP/WITH LICENSE,Traffic / Road
+1153,SECURITY CHECK,Service / Non-Emergency Assist
+1180,SERIOUS INJURY ACCIDENT,Life Safety / Medical
+1180-CR,SERIOUS INJ ACCIDENT-COST RECOVERY,Traffic / Road
+1181,MINOR INJURY ACCIDENT,Life Safety / Medical
+1181-CR,MINOR INJURY ACCIDENT-COST RECOVERY,Life Safety / Medical
+1181R,"MINOR TRAFFIC INJURY, REPORT",Administrative / Legal Process
+1182,NON-INJURY ACCIDENT,Life Safety / Medical
+1182-CR,NON-INJURY ACCIDENT-COST RECOVERY,Life Safety / Medical
+1183,NO DETAIL ACCIDENT,Traffic / Road
+1184,TRAFFIC CONTROL,Traffic / Road
+1184-CR,TRAFFIC CONTROL-COST RECOVERY,Traffic / Road
+1185,REQUEST FOR TOW TRUCK,Traffic / Road
+1188,ASSIST DISABLED MOTORIST,Service / Non-Emergency Assist
+146,IMPERSONATING AN OFFICER,Property Crime
+146R,"IMPERSONATING AN OFFICER,RPT",Property Crime
+187,MURDER,Violence / Person Crime
+20001,FELONY HIT&RUN,Traffic / Road
+20002R,HIT AND RUN REPORT,Administrative / Legal Process
+207R,KIDNAPPING REPORT,Administrative / Legal Process
+211,ROBBERY,Violence / Person Crime
+211A,ROBBERY ALARM,False Alarm / Device
+211C,ROBBERY CASER,Violence / Person Crime
+211R,ROBBERY REPORT,Administrative / Legal Process
+211SPEC,ROBBERY-GPS DEVICE,Violence / Person Crime
+215R,CARJACKING REPORT,Administrative / Legal Process
+23103,RECKLESS DRIVING,Traffic / Road
+23110R,THROWING OBJECTS AT AN OCC VEH REPORT,Administrative / Legal Process
+23152,DUI,Traffic / Road
+23152-CR,DUI-COST RECOVERY,Traffic / Road
+242,BATTERY,Violence / Person Crime
+242R,BATTERY REPORT,Administrative / Legal Process
+245DV,ADW DOMESTIC VIOLENCE RELATED,Violence / Person Crime
+245R,ADW REPORT,Administrative / Legal Process
+278R,CHILD STEALING REPORT,Administrative / Legal Process
+314R,INDECENT EXPOSURE REPORT,Administrative / Legal Process
+368,ABUSE OF ELDER ADULT,Welfare / Mental Health
+374,LITTERING,Public Order / Disturbance
+415CN,CONSTRUCTION NOISE COMPLAINT,Public Order / Disturbance
+415DV,DOMESTIC VIOL/OCCURRING NOW,Violence / Person Crime
+415N,DISTURBING PEACE NOISE ONLY,Public Order / Disturbance
+415N-CR,DISTURB PEACE/NOISE-COST RECOVERY,Public Order / Disturbance
+415W,DISTURBING PEACE UNCONC WEAPON,Violence / Person Crime
+417,THREATENING W/WEAPON,Violence / Person Crime
+417R,THREATENING W/WEAPON REPORT,Administrative / Legal Process
+422R,CRIMINAL THREATS REPORT,Administrative / Legal Process
+451R,ARSON REPORT,Administrative / Legal Process
+459,BURGLARY IN PROGRESS,Property Crime
+459-SUSP,459 SUSPECT THERE NOW,Property Crime
+459A,BURGLARY ALARM,False Alarm / Device
+459C,BURGLARY CASER,Property Crime
+459HP,BURGLARY HOT PROWL,Property Crime
+459R,BURGLARY REPORT,Administrative / Legal Process
+459SPEC,BURGLARY-GPS DEVICE,Property Crime
+470,FORGERY IN PROGRESS,Property Crime
+470R,FORGERY REPORT,Administrative / Legal Process
+470RX,FORGERY OF RX-SUSP THERE NOW,Property Crime
+487,GRAND THEFT $950+,Property Crime
+487R,GRAND THEFT/REPORT $950+,Administrative / Legal Process
+488,PETTY THEFT/UNDER $950,Property Crime
+488R,PETTY THEFT REPORT/UNDER $950,Administrative / Legal Process
+496,RECEIVE/SELL STOLEN PROP,Property Crime
+498,THEFT OF UTILITIES IN PROGRESS,Property Crime
+498R,THEFT OF UTILITIES REPORT,Administrative / Legal Process
+503CAR,STOLEN VEHICLE LOG,Traffic / Road
+508R,"EMBEZZLEMENT, REPORT",Administrative / Legal Process
+5150,MENTAL CASE,Welfare / Mental Health
+5150V,MENTAL CASE-VIOLENT OR URGENT,Welfare / Mental Health
+518R,"EXTORTION, REPORT",Administrative / Legal Process
+530,FALSE USE OF ANOTHERS IDENTITY,Property Crime
+532,FRAUD SOLICITATION/CHARITIES,Property Crime
+532,FRAUD SOLICITATION/CHARITIES,Property Crime
+537R,DEFRAUDING INNKEEPER REPORT,Administrative / Legal Process
+586,ILLEGAL PARKING,Traffic / Road
+586H,ILLEGAL PARKING-HANDICAPPED,Traffic / Road
+586O,ILLEGAL OVO PARKING,Traffic / Road
+594,"VANDALISM, IN PROGRESS",Property Crime
+594GR,GRAFFITI VANDALISM REPORT,Administrative / Legal Process
+594R,"VANDALISM, REPORT",Administrative / Legal Process
+594VARDA,"VANDALISM,ALARM",False Alarm / Device
+595,RUNAWAY VEHICLE,Welfare / Mental Health
+597R,"CRUELTY TO ANIMALS, REPORT",Administrative / Legal Process
+646R,STALKING REPORT,Administrative / Legal Process
+647F,DRUNK - DRUGS/ALCOHOL,Public Order / Disturbance
+653M,"THREATENING PHONE CALL, REPORT",Administrative / Legal Process
+72HR,VEH VIOLATING 72HR PARKING RES,Traffic / Road
+ALERT3,AIRPLANE CRASH,Traffic / Road
+ALERT4,BOMB/HIJACK THREAT,Violence / Person Crime
+AMBER,AMBER ALERT INFO,Service / Non-Emergency Assist
+ASST,ASSIST THE INVALID,Service / Non-Emergency Assist
+AU-MP,MISSING PERSON ALL UNITS INFO,Welfare / Mental Health
+AU1,ALL UNITS INFORMATION-PRI 1,Service / Non-Emergency Assist
+AU10851,AUTO THEFT ALL UNITS INFO,Property Crime
+AU187,MURDER-ALL UNITS INFORMATION,Violence / Person Crime
+AU2,ALL UNITS INFORMATION-PRI 2,Service / Non-Emergency Assist
+AU211,ROBBERY-ALL UNITS INFORMATION,Violence / Person Crime
+AU215,CAR JACK-ALL UNITS INFORMATION,Service / Non-Emergency Assist
+AU23103,RECKLESS DRIVING-ALL UNITS,Traffic / Road
+AU23152,DUI-ALL UNITS INFORMATION,Traffic / Road
+AU245,ADW-ALL UNITS INFORMATION,Service / Non-Emergency Assist
+BIO,BIOHAZARD-DESK CALL,Service / Non-Emergency Assist
+BIOALARM,((ANTHRAX ALARM))),False Alarm / Device
+BOL,AU INFO/USED BY DESK OR RADIO,Service / Non-Emergency Assist
+BOMB,"BOMB THREAT, DESK CALL",Service / Non-Emergency Assist
+BOMB-S,"BOMB THREAT, DESK CALL (SCHOOL)",Service / Non-Emergency Assist
+CCF-PBBP,CCF-PB BLOCK PARTY,Traffic / Road
+CCW,CARRYING CONCEALED WEAPON,Violence / Person Crime
+CITE,ISSUE CITATION,Administrative / Legal Process
+COURT,COURT,Administrative / Legal Process
+CW,CHECK THE WELFARE,Welfare / Mental Health
+DC,DESK CALL,Service / Non-Emergency Assist
+DC-S,DESK CALL (SCHOOL),Service / Non-Emergency Assist
+DEMO,DEMONSTRATION CALLS,Public Order / Disturbance
+DRAGNET,ILLEGAL STREET RACING,Traffic / Road
+FIREWORK,ALL UNITS INFORMATION,Service / Non-Emergency Assist
+FJ,FOUND JUVENILE,Welfare / Mental Health
+FOOT,FOOT PATROL/FIELD INITIATED,Service / Non-Emergency Assist
+FP,FOOT PURSUIT,Violence / Person Crime
+FP,WARRANT,Administrative / Legal Process
+FS,FOUND SENILE,Welfare / Mental Health
+FU,FOLLOW-UP BY FIELD UNIT,Administrative / Legal Process
+GPSPAL,GPS PAROLE VIOLATION,Administrative / Legal Process
+HATEINV,HATE CRIME INVESTIGATION,Violence / Person Crime
+INFO,INFORMATION FOR DISPATCHERS,Service / Non-Emergency Assist
+INFOCHP,INFORMATION FOR CHP,Service / Non-Emergency Assist
+INFOT,"INFO ON TRAFFIC,HIT & RUN-ADVISED EVENT",Traffic / Road
+INFOX,EXTRA PATROL INFO FOR FIELD SGT-ADVISED EVENT,Service / Non-Emergency Assist
+JST,JUVENILE SERVICE TEAM HOTLINE,Welfare / Mental Health
+LOJACK,STOLEN VEH-LOJACK,Property Crime
+LOST,REPORT OF LOST PROPERTY/PLATE,Administrative / Legal Process
+MJ,MISSING JUV OF TENDER YEARS,Welfare / Mental Health
+MP,"MISSING PERSON, REPORT EVAL",Administrative / Legal Process
+MPSSTP,TRAFFIC STOP FROM THE MOBILE COMPUTER,Traffic / Road
+MS,MISSING SENILE,Welfare / Mental Health
+OVO,OVERSIZED VEHICLE ORDINANCE,Traffic / Road
+PARTY,LOUD PARTY,Public Order / Disturbance
+PARTY-CR,LOUD PARTY-COST RECOVERY,Public Order / Disturbance
+PLATE,LOST/STOLEN PLATE ,Property Crime
+PORT,BORDER/PORT RUNNER A/U,Traffic / Road
+PRT,PRT ASSIST,Service / Non-Emergency Assist
+RESCUE,RESCUE CITIZENS,Life Safety / Medical
+RJ,"RUNAWAY JUVENILE, REPORT",Administrative / Legal Process
+SHOPS,INFORMATION FOR SHOPS,Service / Non-Emergency Assist
+STREET,STREET INFORMATION,Service / Non-Emergency Assist
+T,TRAFFIC STOP WITH PLATE,Traffic / Road
+TAGGER,"TAGGER VANDALISM, IN PROGRESS",Property Crime
+TARASOFF,TARASOFF REPORT,Administrative / Legal Process
+TP,TRAFFIC PURSUIT,Traffic / Road
+TRO,"TRO VIOLATION, REPORT",Administrative / Legal Process
+VARDA,VARDA ALARM,False Alarm / Device
+WARRANT,WARRANT,Administrative / Legal Process
+1016QC,SHOPLIFTER/QUICK CITE,Property Crime
+10852,TAMPERING W/VEH IN PROGRESS,Property Crime
+6-Nov,DISCHARGING FIREARMS,Violence / Person Crime
+1115,BALL GAME IN STREET(83 03MC),Public Order / Disturbance
+1115,BALL GAME IN STREET(83 03MC),Public Order / Disturbance
+1147,INJURED PERSON,Life Safety / Medical
+1148,FURNISH TRANSPORTATION,Service / Non-Emergency Assist
+1151,PED STOP/FIELD INTERVIEW,Service / Non-Emergency Assist
+1155,HAZARDOUS/CHEMICAL SPILL,Hazard / Chemical / Explosion
+1160,INVESTIGATE WATER LEAK,Utilities / Water / Power
+1166,SIGNALS OUT OF ORDER,Traffic / Road
+1171,FIRE,Fire / Arson
+1186,SPECIAL DETAIL,Service / Non-Emergency Assist
+1199,OFFICER NEEDS HELP,Violence / Person Crime
+136,INTIMIDATION OF WITNESS,Violence / Person Crime
+187-SUSP,187 SUSPECT THERE NOW,Violence / Person Crime
+20001-CR,FELONY HIT/RUN-COST RECOVERY,Administrative / Legal Process
+20002,MISD HIT/RUN,Traffic / Road
+20002-CR,MISD HIT/RUN-COST RECOVERY,Administrative / Legal Process
+207,KIDNAPPING IN PROGRESS,Violence / Person Crime
+211-SUSP,211 SUSPECT THERE NOW,Violence / Person Crime
+215,CAR JACKING,Violence / Person Crime
+23110,THROWING OBJECTS AT AN OCC VEH,Public Order / Disturbance
+245,ADW,Violence / Person Crime
+245-CR,ADW-COST RECOVERY,Administrative / Legal Process
+245-SUSP,245 SUSPECT THERE NOW,Violence / Person Crime
+246,FIRING AT OCCP'D HSE/VEH,Violence / Person Crime
+246R,FIRING AT OCCP'D HSE/VEH 1110,Violence / Person Crime
+247,FIRING AT UNOCCUPIED VEH,Violence / Person Crime
+247R,FIRING AT UNOCCPD VEH/HSE 1110,Violence / Person Crime
+271,CHILD DESERTION,Welfare / Mental Health
+272,CONTRIBUTING DELINQ MINOR,Welfare / Mental Health
+278,CHILD STEALING,Violence / Person Crime
+278,CHILD STEALING,Violence / Person Crime
+314,INDECENT EXPOSURE,Violence / Person Crime
+330,GAMBLING,Public Order / Disturbance
+402B,ABANDONED REFRIGERATOR,Public Order / Disturbance
+415,DISTURBING PEACE,Public Order / Disturbance
+415,DISTURBING PEACE,Public Order / Disturbance
+415CAPP,DIST PEACE-CAPP HOUSE,Public Order / Disturbance
+415PP,PRESERVE THE PEACE,Service / Non-Emergency Assist
+415SH-CR,SOCIAL HOST-COST RECOVERY,Administrative / Legal Process
+415TOW,DISTURBING PEACE RE: TOWING,Public Order / Disturbance
+415V,DISTURBING PEACE W/VIOLENCE,Public Order / Disturbance
+422,CRIMINAL THREATS,Violence / Person Crime
+451,ARSON IN PROGRESS,Fire / Arson
+502,COMPUTER CRIMES - TRU USE ONLY,Property Crime
+537,"DEFRAUDING INNKEEPER, IN PROGR",Property Crime
+597,"CRUELTY TO ANIMALS, IN PROGRES",Animal-related
+602,TRESPASSING,Public Order / Disturbance
+646,STALKING,Violence / Person Crime
+647B,PROSTITUTION,Public Order / Disturbance
+911,"UNK EMERG, HANG UP/OPEN LINE",False Alarm / Device
+911P,"UNK EMER,HANGUP/OPEN,PAYFONE",False Alarm / Device
+ALERT2,AIRPLANE PROBLEM,Aviation / Port / Border
+ANIMAL,VICIOUS ANIMAL,Animal-related
+APPT,APPOINTMENT,Administrative / Legal Process
+AU1171,ALL UNITS FIRE INFO-PRI 1,Service / Non-Emergency Assist
+AUHATE,HATE INCIDENT ALL UNITS INF,Violence / Person Crime
+BIKE,DOCKLESS BIKE COMPLAINT,Service / Non-Emergency Assist
+BLOOD,BLOOD RUN,Life Safety / Medical
+BLUE,TAXI OR BUS NEEDS HELP,Traffic / Road
+C10,SWAT STAGING,Violence / Person Crime
+C100,ATTACK ON PD FACILITY,Violence / Person Crime
+C11,SWAT STAGING,Violence / Person Crime
+C11-CR,SWAT STAGING-COST RECOVERY,Violence / Person Crime
+C12,SWAT EMERGENCY RESPONSE,Violence / Person Crime
+C5,STAKEOUT,Violence / Person Crime
+C6,STAYOUT OF AREA/NO RADIO TRANS,Administrative / Legal Process
+CC,CITIZEN CONTACT,Service / Non-Emergency Assist
+CCCC,CHRONIC COMM CALLER CONTROL,Service / Non-Emergency Assist
+CCF,CITIZEN'S COMPLAINT INVESTIGAT,Service / Non-Emergency Assist
+CCF-EVNT,CITIZEN'S COMPLAINT SPEC EVENT,Service / Non-Emergency Assist
+CCF-RRM,CCF-ROCK N ROLL MARATHON,Administrative / Legal Process
+COVER,COVER NOW,Service / Non-Emergency Assist
+COVER-CR,COVER NOW-COST RECOVERY,Administrative / Legal Process
+DRUN,HOMELAND SECURITY CHECKS,Administrative / Legal Process
+EJECT,EJECTED FROM AN EVENT,Public Order / Disturbance
+ESCAPE,ESCAPE/ESCAPEE,Violence / Person Crime
+EVAC,EVACUATE CITIZENS,Evacuation / Perimeter
+EVID,PICK UP EVIDENCE,Administrative / Legal Process
+EXPLO,EXPLOSION,Hazard / Chemical / Explosion
+FC,FRONT COUNTER CLOSURES,Administrative / Legal Process
+FD,FLAG DOWN/FIELD INITIATED,Service / Non-Emergency Assist
+FIREHZRD,FIREWORK HAZARD,Hazard / Chemical / Explosion
+FOUND,FOUND PROPERTY,Welfare / Mental Health
+HZRD,HAZARDOUS CONDITION,Hazard / Chemical / Explosion
+LASER,ILLEGAL USE OF LASER ,Public Order / Disturbance
+MEXICO,LIAISON UNITS VISITING MEXICO,Administrative / Legal Process
+MFF,MOBILE FIELD FORCE ACTIVATION,Public Order / Disturbance
+MTG,IN A MEETING/OUT OF SERVICE,Administrative / Legal Process
+MUTAID,INTERAGAENCY MUTUAL AID,Administrative / Legal Process
+NARC,NARCOTICS ACTIVITY,Violence / Person Crime
+NONU,REQUEST FOR NON URGENT COVER,Service / Non-Emergency Assist
+NONU-CR,NON URGENT COVER-COST RECOVERY,Administrative / Legal Process
+PAPER,FINISH 1110/FIELD INITIATED,Administrative / Legal Process
+POP,PROBLEM ORIENTED POLICING,Service / Non-Emergency Assist
+REPORT,CRIME CASE NUMBER REQUEST,Administrative / Legal Process
+ROUTE,ROUTE SLIP (FLD INVESTIGATION),Administrative / Legal Process
+RRM,ROCK N ROLL MARATHON,Administrative / Legal Process
+RRM-1185,ROCK N ROLL 1185,Administrative / Legal Process
+RRM-CCF,ROCK N ROLL CCF,Administrative / Legal Process
+RRM-TOWS,VEHICLES TOWED DUE TO RRM,Traffic / Road
+SCALP,TICKET SCALPER,Public Order / Disturbance
+SCHOOL,SCHOOL DETAIL,Service / Non-Emergency Assist
+SELENF,SELECTIVE ENFORCEMENT,Service / Non-Emergency Assist
+SIG,SIGALERT,Traffic / Road
+SKATE,SKATEBOARDERS,Public Order / Disturbance
+SLEEPER,SLEEPER,Welfare / Mental Health
+TLO,TERRORISM LIAISON OFFICER,Administrative / Legal Process
