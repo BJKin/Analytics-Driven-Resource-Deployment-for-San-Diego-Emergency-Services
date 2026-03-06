@@ -207,14 +207,23 @@ def step3_baseline_forecast(df, test_days=14):
         assert c in df.columns
 
     train, test = _train_test_split_by_date(df, test_days=test_days)
-
-    train_mean = train.groupby(["BEAT_KEY", "HOUR", "DOW"]).size().to_frame("MEAN_CALLS").reset_index()
-    train_mean["MEAN_CALLS"] = train_mean["MEAN_CALLS"].astype(float)
+    train_daily = (
+        train.groupby(["DATE", "BEAT_KEY", "HOUR", "DOW"])
+        .size()
+        .to_frame("DAILY_CALLS")
+        .reset_index()
+    )
+    train_mean = (
+        train_daily.groupby(["BEAT_KEY", "HOUR", "DOW"])["DAILY_CALLS"]
+        .mean()
+        .to_frame("MEAN_DAILY_CALLS")
+        .reset_index()
+    )
 
     test_actual = test.groupby(["DATE", "BEAT_KEY", "HOUR", "DOW"]).size().to_frame("ACTUAL_CALLS").reset_index()
     pred = test_actual.merge(train_mean, on=["BEAT_KEY", "HOUR", "DOW"], how="left")
-    pred["MEAN_CALLS"] = pred["MEAN_CALLS"].fillna(0.0)
-    pred["PRED_CALLS"] = pred["MEAN_CALLS"]
+    pred["MEAN_DAILY_CALLS"] = pred["MEAN_DAILY_CALLS"].fillna(0.0)
+    pred["PRED_CALLS"] = pred["MEAN_DAILY_CALLS"]
 
     mae = (pred["ACTUAL_CALLS"] - pred["PRED_CALLS"]).abs().mean()
     rmse = math.sqrt(((pred["ACTUAL_CALLS"] - pred["PRED_CALLS"]) ** 2).mean())
