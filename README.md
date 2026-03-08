@@ -13,20 +13,24 @@ Dataset Name: Police Calls for Service 2025
 - Number of observations: 466979
 - Number of variables: 14
 - Description of variables: 
-    - `INCIDENT_NUM` - Unique incident number identifier
-    - `DATE_TIME` - Recorded date and time of incident
-    - `DAY_OF_WEEK` - Day of the week incident occurred
-    - `ADDRESS_NUMBER_PRIMARY` - Primary address number
-    - `ADDRESS_DIR_PRIMARY` - Primary address direction
-    - `ADDRESS_ROAD_PRIMARY` - Primary address street name
-    - `ADDRESS_SFX_PRIMARY` - Primary address suffix
-    - `ADDRESS_DIR_INTERSECTING` - Intersecting address direction
-    - `ADDRESS_ROAD_INTERSECTING` - Intersecting address street name
-    - `ADDRESS_SFX_INTERSECTING` - Intersecting address suffix
-    - `CALL_TYPE` - Code corresponding to type of incident
-    - `DISPOSITION` - Code corresponding to outcome or resolution of the incident
-    - `BEAT` - Geographic patrol zone or district number that the incident originated from
-    - `PRIORITY` - Urgency level assigned to the incident
+
+    | Variable | Description |
+    |----------|-------------|
+    | `INCIDENT_NUM`  | Unique incident number identifier |
+    | `DATE_TIME`  | Recorded date and time of incident |
+    | `DAY_OF_WEEK`  | Day of the week incident occurred  |
+    | `ADDRESS_NUMBER_PRIMARY`  | Primary address number |
+    | `ADDRESS_DIR_PRIMARY`  | Primary address direction |
+    | `ADDRESS_ROAD_PRIMARY`  | Primary address street name |
+    | `ADDRESS_SFX_PRIMARY`  | Primary address suffix |
+    | `ADDRESS_DIR_INTERSECTING`  | Intersecting address direction |
+    | `ADDRESS_ROAD_INTERSECTING`  | Intersecting address street name |
+    | `ADDRESS_SFX_INTERSECTING`  | Intersecting address suffix |
+    | `CALL_TYPE`  |  Code corresponding to type of incident |
+    | `DISPOSITION`  | Code corresponding to outcome or resolution of the incident |
+    | `BEAT`  | Geographic patrol zone or district number that the incident originated from |
+    | `PRIORITY`  | Urgency level assigned to the incident |
+
 - Descriptions of any shortcomings: 
     - There are large amounts of missing fields in the primary address suffix column and primary address direction column.  This is likely due to many streets not having a suffix or direction, but this may cause complications for data analysis as entries with missing fields don't necessarily correlate to data that can be thrown out.  An even more extreme version of this can be seen in all columns corresponding to the intersecting address for a given incident as most include only the intersecting street name or completely exclude any intersecting data.
 
@@ -35,12 +39,16 @@ Dataset Name: Police beats (geo-data)
 - Number of observations: 135
 - Number of variables: 6
 - Description of variables:
-    - `objectid` - Unique object identifier
-    - `beat` - Geographic patrol zone
-    - `div` - Police division beat is contained in
-    - `serv` - Service area beat is contained in
-    - `name` - Name of geographic patrol zone beat is in
-    - `geometry` - Geometry of beat
+
+    | Variable | Description |
+    |----------|-------------|
+    | `objectid` | Unique object identifier |
+    | `beat` | Geographic patrol zone |
+    | `div` | Police division beat is contained in |
+    | `serv` | Service area beat is contained in |
+    | `name` | Name of geographic patrol zone beat is in |
+    | `geometry` | Geometry of beat |
+
 - Descriptions of any shortcomings: 
     - There are no crime statistics that correspond with the geographic beat data, so in order to create interesting choropleth maps we have to manually add associated crime data columns ourselves.
 
@@ -49,8 +57,12 @@ Dataset Name: Police disposition codes
 - Number of observations: 18
 - Number of variables: 2
 - Description of variables:
-    - `dispo_code` - Unique disposition code
-    - `description` - Short description of code
+
+    | Variable | Description |
+    |----------|-------------|
+    | `dispo_code` | Unique disposition code |
+    | `description` | Short description of code |
+
 - Descriptions of any shortcomings: 
     - There are no shortcomings with this dataset as it is simply a reference guide for the San Diego Police Department disposition codes.
 
@@ -59,8 +71,12 @@ Dataset Name: Police call type definitions
 - Number of observations: 289
 - Number of variables: 2
 - Description of variables:
-    - `call_type` - Unique call type identifier
-    - `description` - Short description of call type identifier
+
+    | Variable | Description |
+    |----------|-------------|
+    | `call_type` | Unique call type identifier |
+    | `description` | Short description of call type identifier |
+
 - Descriptions of any shortcomings: 
     - There are no shortcomings with this dataset as it is simply a reference guide for the San Diego Police Department call type codes.
 
