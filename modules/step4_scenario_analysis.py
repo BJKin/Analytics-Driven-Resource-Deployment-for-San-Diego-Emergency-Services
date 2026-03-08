@@ -328,17 +328,17 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Step 4 scenario analysis")
     parser.add_argument(
         "--base-allocation",
-        default="data/01-processed/step4_resource_deployment.csv",
+        default="../data/01-processed/step4_resource_deployment.csv",
         help="Path to existing step4_resource_deployment.csv",
     )
     parser.add_argument(
         "--hotspots",
-        default="data/01-processed/step3_hotspots_beats.csv",
+        default="../data/01-processed/step3_hotspots_beats.csv",
         help="Path to step3_hotspots_beats.csv",
     )
     parser.add_argument(
         "--outdir",
-        default="data/01-processed/step4_scenarios",
+        default="../data/01-processed/step4_scenarios",
         help="Directory for scenario-analysis outputs",
     )
     parser.add_argument(

@@ -374,7 +374,7 @@ def main():
     Run all EDA plots end-to-end.
     Reads the cleaned_v2 CSV, creates output directory, and saves all figures.
     """
-    # ----- Paths you may want to change -----
+    # ----- Paths you may want to change based on your system-----
     DATA_CSV    = "./data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv"
     GEOJSON     = "./data/00-raw/pd_beats_datasd.geojson"
 
@@ -402,7 +402,7 @@ def main():
     plot_disposition_pareto(df)
     plot_daily_timeseries(df)
 
-    # ----- Graph 11: choropleth (skip if geojson missing) -----
+    # ----- Graph 11: choropleth -----
     if os.path.exists(GEOJSON):
         plot_beat_choropleth(df, GEOJSON)
     else:
