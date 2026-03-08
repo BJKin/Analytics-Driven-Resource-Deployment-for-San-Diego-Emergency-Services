@@ -46,7 +46,7 @@ def clean_data(file: str, columns_to_remove=[], columns_to_clean=[]) -> pd.DataF
     assert all(isinstance(column, str) for column in columns_to_clean), 'All values in columns to be cleaned list must be strings'
 
     # Create data directory if it doesn't exist such that the cleaned dataframe can be saved as a .csv
-    os.makedirs('../data/01-processed', exist_ok=True)
+    os.makedirs('./data/01-processed', exist_ok=True)
 
     # Load dataframe and get column names
     df = pd.read_csv(file)
@@ -66,7 +66,7 @@ def clean_data(file: str, columns_to_remove=[], columns_to_clean=[]) -> pd.DataF
     df_cleaned = df_cleaned.dropna(subset=columns_to_clean).reset_index(drop=True)
 
     # Save cleaned dataframe to .csv for later manipulation
-    df_cleaned.to_csv(f'../data/01-processed/df_cleaned.csv', index=False)
+    df_cleaned.to_csv(f'./data/01-processed/df_cleaned.csv', index=False)
 
     return df_cleaned
 
@@ -227,10 +227,10 @@ def add_disposition_category_and_risk(
 
 def main() -> None:
     # ----- Paths you may want to change based on your system -----
-    raw_csv_path = "../data/00-raw/pd_calls_for_service_2025_datasd.csv"
-    mapping_csv_path = "../data/00-raw/calltypes_category_mapping_table.csv"
-    cleaned_intermediate_path = "../data/01-processed/df_cleaned.csv"
-    out_path = "../data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv"
+    raw_csv_path = "./data/00-raw/pd_calls_for_service_2025_datasd.csv"
+    mapping_csv_path = "./data/00-raw/calltypes_category_mapping_table.csv"
+    cleaned_intermediate_path = "./data/01-processed/df_cleaned.csv"
+    out_path = "./data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv"
 
     # ----- Initial cleaning from raw CSV -----
     print("Initial cleaning (raw -> df_cleaned)")
