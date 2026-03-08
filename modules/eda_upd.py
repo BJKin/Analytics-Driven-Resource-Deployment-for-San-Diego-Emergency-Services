@@ -134,17 +134,20 @@ def plot_seasonal_monthly(df, figsize=(13,5)):
 
 def plot_call_type_distribution(df, top_n=20, figsize=(12,6)):
     '''
-    [Output Graph 3] Visualizes the frequency of the Top-N most common call types.
+    [Output Graph 3] Visualizes the frequency of the Top-N most common call type categories.
+    Uses CALL_TYPE_CATEGORY from clean_further if available, otherwise falls back to CALL_TYPE.
     '''
-    assert "CALL_TYPE" in df.columns
+    col = "CALL_TYPE_CATEGORY" if "CALL_TYPE_CATEGORY" in df.columns else "CALL_TYPE"
+    assert col in df.columns, f"Missing required column: {col}"
 
-    counts = df["CALL_TYPE"].value_counts().head(top_n).sort_values()
+    counts = df[col].value_counts().head(top_n).sort_values()
 
     fig, ax = plt.subplots(figsize=figsize)
     bars = ax.barh(counts.index, counts.values,
-                   color=sns.color_palette("Blues_r", top_n))
+                   color=sns.color_palette("Blues_r", len(counts)))
     ax.bar_label(bars, fmt="%,.0f", padding=3, fontsize=8)
-    ax.set_title(f"Top {top_n} Call Types", fontsize=13)
+    ax.set_title(f"Top {top_n} Call Type Categories" if col == "CALL_TYPE_CATEGORY"
+                 else f"Top {top_n} Call Types", fontsize=13)
     ax.set_xlabel("Count"); plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda3_call_type.png"), dpi=150)
     plt.show()
@@ -171,20 +174,29 @@ def plot_beat_hotspot(df, top_n=20, figsize=(12,5)):
 def plot_priority_distribution(df, figsize=(11,4)):
     '''
     [Output Graph 5] Visualizes call severity through Priority levels and High-Risk ratios.
+    Uses IS_HIGH_RISK from clean_further if available, otherwise falls back to priority <= 2.
     '''
     assert "PRIORITY" in df.columns
 
     prio   = pd.to_numeric(df["PRIORITY"], errors="coerce").dropna()
     counts = prio.value_counts().sort_index()
-    high = int((prio <= 2).sum())
-    other = int((prio > 2).sum())
+
+    # Use IS_HIGH_RISK from clean_further if available; otherwise fall back to priority threshold
+    if "IS_HIGH_RISK" in df.columns:
+        high  = int(df["IS_HIGH_RISK"].sum())
+        other = int(len(df) - high)
+        risk_label = "High-Risk (HR disposition)"
+    else:
+        high  = int((prio <= 2).sum())
+        other = int((prio > 2).sum())
+        risk_label = "High-Risk (Priority ≤ 2)"
 
     fig, axes = plt.subplots(1, 2, figsize=figsize)
     axes[0].bar(counts.index.astype(str), counts.values, color=sns.color_palette("flare", len(counts)))
     axes[0].set_title("Calls by Priority Level")
     axes[0].set_xlabel("Priority"); axes[0].set_ylabel("Count")
 
-    axes[1].pie([high, other], labels=["High-risk (Threshold: 2)","Other"], colors=["#C44E52","#4C72B0"], startangle=90)
+    axes[1].pie([high, other], labels=[risk_label, "Other"], colors=["#C44E52","#4C72B0"], startangle=90)
     axes[1].set_title("High-Risk Share")
 
     plt.suptitle("Priority Distribution", fontsize=13, y=1.01)
@@ -192,24 +204,26 @@ def plot_priority_distribution(df, figsize=(11,4)):
     plt.savefig(os.path.join(OUT_DR, "eda5_priority.png"), dpi=150, bbox_inches="tight")
     plt.show()
 
-def plot_disposition(df, top_n=15, figsize=(11,5)):
+def plot_disposition(df, figsize=(11,5)):
     '''
-    [Output Graph 6] Visualizes how calls were resolved, helping to distinguish between formal criminal reports and 
-    administrative or non-actionable calls.
+    [Output Graph 6] Visualizes how calls were resolved using DISPOSITION_CATEGORY.
+    Falls back to raw DISPOSITION if the category column is not present.
     '''
-    assert "DISPOSITION" in df.columns
+    col = "DISPOSITION_CATEGORY" if "DISPOSITION_CATEGORY" in df.columns else "DISPOSITION"
+    assert col in df.columns, f"Missing required column: {col}"
 
-    counts = df["DISPOSITION"].value_counts().head(top_n)
+    counts = df[col].value_counts()
     pct    = counts / len(df) * 100
 
     fig, ax = plt.subplots(figsize=figsize)
     bars = ax.barh(counts.index[::-1], counts.values[::-1],
-                   color=sns.color_palette("muted", top_n))
+                   color=sns.color_palette("muted", len(counts)))
     for bar, p in zip(bars, pct.values[::-1]):
         ax.text(bar.get_width() + counts.max()*0.01,
                 bar.get_y() + bar.get_height()/2,
                 f"{p:.1f}%", va="center", fontsize=8)
-    ax.set_title(f"Top {top_n} Dispositions", fontsize=13)
+    ax.set_title("Disposition Category Distribution" if col == "DISPOSITION_CATEGORY"
+                 else "Top Dispositions", fontsize=13)
     ax.set_xlabel("Count"); plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda6_disposition.png"), dpi=150)
     plt.show()
@@ -242,4 +256,160 @@ def plot_calltype_hour_heatmap(df, top_n=12, figsize=(13, 6)):
     plt.savefig(os.path.join(OUT_DR, "eda7_calltype_hour_heatmap.png"), dpi=150)
     plt.show()
 
-    
+def plot_category_by_season(df, figsize=(12,6)):
+    '''
+    [Output Graph 8] Stacked bar chart: CALL_TYPE_CATEGORY counts by Season.
+    Shows how the composition of call demand shifts across seasons.
+    '''
+    col = "CALL_TYPE_CATEGORY" if "CALL_TYPE_CATEGORY" in df.columns else "CALL_TYPE"
+    df = add_time_features(df)
+
+    pivot = (
+        df.groupby(["SEASON", col])
+        .size()
+        .unstack(fill_value=0)
+        .reindex([s for s in SEASON_ORDER if s in df["SEASON"].unique()])
+    )
+
+    colors = [
+        "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
+        "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC",
+    ]
+
+    ax = pivot.plot(
+        kind="bar", stacked=True, figsize=figsize,
+        color=colors[:len(pivot.columns)],
+    )
+    ax.set_xlabel("Season", fontsize=14)
+    ax.set_ylabel("Number of Calls", fontsize=14)
+    ax.set_title("Call Type Category by Season", fontsize=16)
+    ax.tick_params(axis="x", rotation=0, labelsize=12)
+    ax.tick_params(axis="y", labelsize=12)
+    ax.legend(
+        title=col, bbox_to_anchor=(1.02, 1), loc="upper left",
+        fontsize=11, title_fontsize=12,
+    )
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DR, "eda8_category_by_season.png"), dpi=150, bbox_inches="tight")
+    plt.show()
+
+
+def plot_disposition_pareto(df, figsize=(12,6)):
+    '''
+    [Output Graph 9] Pareto chart of DISPOSITION_CATEGORY with cumulative percentage line.
+    Highlights which few disposition outcomes account for most of the volume.
+    '''
+    col = "DISPOSITION_CATEGORY" if "DISPOSITION_CATEGORY" in df.columns else "DISPOSITION"
+    assert col in df.columns, f"Missing required column: {col}"
+
+    counts = df[col].dropna().value_counts().sort_values(ascending=False)
+    cum_pct = counts.cumsum() / counts.sum() * 100
+
+    fig, ax1 = plt.subplots(figsize=figsize)
+
+    ax1.bar(counts.index.astype(str), counts.values, color="#F4B183")
+    ax1.set_ylabel("Count", fontsize=14)
+    ax1.set_xlabel("Disposition Category", fontsize=14)
+    ax1.set_title(f"Pareto Chart: {col} (n={counts.sum():,})", fontsize=16)
+    plt.setp(ax1.get_xticklabels(), rotation=0, ha="center", fontsize=12)
+
+    ax2 = ax1.twinx()
+    ax2.plot(counts.index.astype(str), cum_pct.values,
+             marker="o", color="#E07A2D", linewidth=2)
+    ax2.set_ylabel("Cumulative Percentage (%)", fontsize=14)
+    ax2.set_ylim(0, 105)
+    ax2.axhline(80, linestyle="--", linewidth=1.5, color="#D98C3F")
+    ax2.text(len(counts) - 1, 81, "80%", ha="right", va="bottom", fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DR, "eda9_disposition_pareto.png"), dpi=150)
+    plt.show()
+
+
+def plot_daily_timeseries(df, figsize=(12,6)):
+    '''
+    [Output Graph 10] Daily incident count time-series line plot.
+    Useful for spotting long-term trends, spikes, and anomalies.
+    '''
+    df = add_time_features(df)
+
+    daily = df.groupby("DATE").size().reset_index(name="CALLS")
+    daily["DATE"] = pd.to_datetime(daily["DATE"])
+    daily = daily.sort_values("DATE")
+
+    fig, ax = plt.subplots(figsize=figsize)
+    sns.lineplot(data=daily, x="DATE", y="CALLS", color="blue", lw=1.5, ax=ax)
+    ax.set_title("Daily Police Calls for Service Count", fontsize=14)
+    ax.set_xlabel("Date"); ax.set_ylabel("Daily Incident Count")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DR, "eda10_daily_timeseries.png"), dpi=150)
+    plt.show()
+
+
+def plot_beat_choropleth(df, geojson_path, figsize=(12,10)):
+    '''
+    [Output Graph 11] Choropleth map of call volume by patrol beat.
+    Requires geopandas and a GeoJSON file of beat boundaries.
+    '''
+    import geopandas as gpd
+
+    df = add_beat_key(df)
+    call_counts = df.groupby("BEAT_KEY").size().reset_index(name="count")
+    call_counts = call_counts.rename(columns={"BEAT_KEY": "beat"})
+
+    beats_gdf = gpd.read_file(geojson_path)
+    beats_gdf["beat"] = beats_gdf["beat"].astype(str).str.strip()
+    beats_gdf = beats_gdf.merge(call_counts, on="beat", how="left")
+
+    fig, ax = plt.subplots(figsize=figsize)
+    beats_gdf.plot(column="count", cmap="magma", legend=True, ax=ax)
+    ax.set_title("San Diego Emergency Calls by Beat", fontsize=14)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DR, "eda11_beat_choropleth.png"), dpi=150)
+    plt.show()
+
+def main():
+    """
+    Run all EDA plots end-to-end.
+    Reads the cleaned_v2 CSV, creates output directory, and saves all figures.
+    """
+    # ----- Paths you may want to change -----
+    DATA_CSV    = "./data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv"
+    GEOJSON     = "./data/00-raw/pd_beats_datasd.geojson"
+
+    os.makedirs(OUT_DR, exist_ok=True)
+
+    # ----- Load data -----
+    assert os.path.exists(DATA_CSV), f"Data file not found: {DATA_CSV}"
+    df = pd.read_csv(DATA_CSV)
+    print(f"Loaded {len(df):,} rows from {DATA_CSV}\n")
+
+    # ----- Summary -----
+    summary_stats(df)
+
+    # ----- Graph 1–7: always run -----
+    plot_hour_dow_heatmap(df)
+    plot_seasonal_monthly(df)
+    plot_call_type_distribution(df)
+    plot_beat_hotspot(df)
+    plot_priority_distribution(df)
+    plot_disposition(df)
+    plot_calltype_hour_heatmap(df)
+
+    # ----- Graph 8–10: new additions -----
+    plot_category_by_season(df)
+    plot_disposition_pareto(df)
+    plot_daily_timeseries(df)
+
+    # ----- Graph 11: choropleth (skip if geojson missing) -----
+    if os.path.exists(GEOJSON):
+        plot_beat_choropleth(df, GEOJSON)
+    else:
+        print(f"[SKIP] Choropleth: GeoJSON not found at {GEOJSON}")
+
+    print(f"\nAll EDA outputs saved to: {OUT_DR}/")
+
+
+if __name__ == "__main__":
+    main()
