@@ -125,14 +125,18 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
                     - Look up the category in the mapping dict
                     - If no match is found, the row is flagged as unmapped
                     - A hard-coded mapping converts raw disposition codes to an set of actual outcome labels:
-                        - **Cancelled** - `W`, `X`, `CAN`
-                        - **Duplicate** - `DUP`, `V`
-                        - **Arrest** - `A`, `AB`, `AHR`
-                        - **Reported** - `R`, `RB`, `RHR`
-                        - **Closed** - `K`, `KB`, `KHR`
-                        - **Unfounded** - `U`
-                        - **Vehicle** - `S`
-                        - **Other** - `O`, `OHR`
+
+                        | Category | Codes |
+                        |---|---|
+                        | Cancelled | `W`, `X`, `CAN` |
+                        | Duplicate | `DUP`, `V` |
+                        | Arrest | `A`, `AB`, `AHR` |
+                        | Reported | `R`, `RB`, `RHR` |
+                        | Closed | `K`, `KB`, `KHR` |
+                        | Unfounded | `U` |
+                        | Vehicle | `S` |
+                        | Other | `O`, `OHR` |
+
             - Create an `IS_HIGH_RISK` boolean flag
                 - The risk flag is set by a simple suffix rule: 
                     - `IS_HIGH_RISK = True` if `DISPOSITION` code ends with `HR`
@@ -149,43 +153,25 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
         - Output:
             - All visualizations are saved to `./data/EDA_outputs/`
     - Visualization Functions:
-        - **`plot_hour_dow_heatmap`**
-            - Hour × Day-of-Week heatmap
-            - Outputs: `eda1_hour_dow_heatmap.png`
-        - **`plot_seasonal_monthly`**
-            - Monthly bar chart + seasonal boxplot
-            - Outputs: `eda2_seasonal.png`
-        - **`plot_call_type_distribution`**
-            - Top-N call type categories (horizontal bar)
-            - Outputs: `eda3_call_type.png`
-        - **`plot_beat_hotspot`**
-            - Top-N beats by call volume
-            - Outputs: `eda4_beat_hotspot.png`
-        - **`plot_priority_distribution`**
-            - Priority bar chart + high-risk pie
-            - Outputs: `eda5_priority.png`
-        - **`plot_disposition`**
-            - Disposition category bar chart with % labels
-            - Outputs: `eda6_disposition.png`
-        - **`plot_calltype_hour_heatmap`**
-            - Top-N call types × hour (row-normalized)
-            - Outputs: `eda7_calltype_hour_heatmap.png`
-        - **`plot_category_by_season`**
-            - Call type category × season (stacked bar)
-            - Outputs: `eda8_category_by_season.png`
-        - **`plot_disposition_pareto`**
-            - Disposition Pareto chart with 80% line
-            - Outputs: `eda9_disposition_pareto.png`
-        - **`plot_daily_timeseries`**
-            - Daily incident count time-series
-            - Outputs: `eda10_daily_timeseries.png`
-        - **`plot_beat_choropleth`**
-            - Geographic heatmap by beat (requires GeoJSON)
-            - Outputs: `eda11_beat_choropleth.png`
+
+        | # | Function | Output file | Description |
+        |---|---|---|---|
+        | 1 | `plot_hour_dow_heatmap` | `eda1_hour_dow_heatmap.png` | Hour × Day-of-Week heatmap |
+        | 2 | `plot_seasonal_monthly` | `eda2_seasonal.png` | Monthly bar chart + seasonal boxplot |
+        | 3 | `plot_call_type_distribution` | `eda3_call_type.png` | Top-N call type categories (horizontal bar) |
+        | 4 | `plot_beat_hotspot` | `eda4_beat_hotspot.png` | Top-N beats by call volume |
+        | 5 | `plot_priority_distribution` | `eda5_priority.png` | Priority bar chart + high-risk pie |
+        | 6 | `plot_disposition` | `eda6_disposition.png` | Disposition category bar chart with % labels |
+        | 7 | `plot_calltype_hour_heatmap` | `eda7_calltype_hour_heatmap.png` | Top-N call types × hour (row-normalized) |
+        | 8 | `plot_category_by_season` | `eda8_category_by_season.png` | Call type category × season (stacked bar) |
+        | 9 | `plot_disposition_pareto` | `eda9_disposition_pareto.png` | Disposition Pareto chart with 80% line |
+        | 10 | `plot_daily_timeseries` | `eda10_daily_timeseries.png` | Daily incident count time-series |
+        | 11 | `plot_beat_choropleth` | `eda11_beat_choropleth.png` | Geographic heatmap by beat (requires GeoJSON) |
+
     - Helper functions:
-        - **`add_time_features`** 
-            - derives `HOUR`, `DOW`, `MONTH`, `DATE`, `SEASON` from `DATE_TIME`.
-        - **`add_beat_key`** 
-            - standardizes the `BEAT` column to a clean `BEAT_KEY` string.
-        - **`summary_stats`** 
-            - prints shape, missing values, dtypes, and numerical summary.
+
+        | Function | Description |
+        |----------|-------------|
+        | `add_time_features` | derives `HOUR`, `DOW`, `MONTH`, `DATE`, `SEASON` from `DATE_TIME` |
+        | `add_beat_key`      | standardizes the `BEAT` column to a clean `BEAT_KEY` string |
+        | `summary_stats`     | prints shape, missing values, dtypes, and numerical summary |
