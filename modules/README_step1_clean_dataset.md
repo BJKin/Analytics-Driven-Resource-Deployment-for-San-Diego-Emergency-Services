@@ -112,7 +112,7 @@ A hard-coded mapping converts raw disposition codes to an set of actual outcome 
 The risk flag is set by a simple suffix rule:
 
 $$
-\mathtt{IS\_HIGH\_RISK} = \text{True if DISPOSITION code ends with "HR"}
+\text{IS\_HIGH\_RISK} = \text{True if DISPOSITION code ends with "HR"}
 $$
 
 Any disposition code not listed above is treated as unmapped and dropped by default.
