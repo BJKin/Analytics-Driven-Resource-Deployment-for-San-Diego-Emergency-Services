@@ -206,12 +206,21 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
             - `.data/01-processed/step3_hotspots_beat_season.csv`
             - `.data/01-processed/step3_forecast_predictions.csv`
             - `.data/01-processed/step3_forecast_metrics.csv`
+            - `.data/01-processed/step3_actual_calls_top3.png`
+            - `.data/01-processed/step3_predicted_calls_top3.png`
             - `.data/01-processed/step4_resource_deployment.csv ` - (base allocation table used by Step 4)
-    - Visualization Functions:
+    - Core Pipeline Functions (Callled by step3_upd.py):
 
         | # | Function | Output file | Description |
         |---|---|---|---|
-        | 1 | `Top-3 hotspot beats: actual calls (test window)` | `./data/01-processed/step3_actual_calls_top3.png` | Line plot of actual daily call counts for the top 3 hotspot beats over the test window. |
-        | 2 | `Top-3 hotspot beats: baseline predicted calls (test window) ` | `./data/01-processed/step3_predicted_calls_top3.png` | Line plot of baseline predicted daily call counts for the top 3 hotspot beats over the test window. |
+        | 1 | `build_features_v2_from_processed()` | `pd_calls_for_service_2025_datasd_features_v2.csv` | Builds the Step3/4-ready feature table from the cleaned dataset. |
+        | 2 | `step3_hotspots() ` | `step3_hotspots_beats.csv, step3_hotspots_beat_season.csv` | Computes hotspot call counts by beat (and beat×season).  |
+        | 3 | `step3_baseline_forecast() ` | `step3_forecast_predictions.csv, step3_forecast_metrics.csv` | Runs baseline forecasting and produces prediction table + metrics.  |
+        | 4 | `step4_resource_deployment() ` | `step4_resource_deployment.csv` | Generates the base Step 4 allocation table (input for scenario analysis).  |
 
+    - Visualization Functions:
+        | # | Function | Output file | Description |
+        |---|---|---|---|
+        | 1 | `main()` | `step3_actual_calls_top3.png` | Saves a line plot of actual daily calls for the top-3 hotspot beats over the test window.  |
+        | 2 | ` ` | `step3_predicted_calls_top3.png` | Saves a line plot of baseline predicted daily calls for the top-3 hotspot beats over the test window.  |
 
