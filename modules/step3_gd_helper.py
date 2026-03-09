@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
 """
 step3_gd_helper.py - XGBoost-based forecasting helper for Step 3
 
 This module provides gradient boosting based demand forecasting
 as an alternative to the baseline average method.
+!! not implemented!!
 """
 
 import math
