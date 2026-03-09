@@ -191,3 +191,28 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
         | `add_time_features` | derives `HOUR`, `DOW`, `MONTH`, `DATE`, `SEASON` from `DATE_TIME` |
         | `add_beat_key`      | standardizes the `BEAT` column to a clean `BEAT_KEY` string |
         | `summary_stats`     | prints shape, missing values, dtypes, and numerical summary |
+
+### Step 3- Hotspost & Forecasting
+- •	Navigate to the root directory and run Step 3:
+    ```bash
+    python modules/step3_upd.py
+    ```
+    - Generates
+        - Input:
+            - `data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv`- Output of `step1_clean.py`
+            - `data/00-raw/pd_beats_datasd.geojson` - Beat boundary polygons
+        - Output:
+            - `.data/01-processed/step3_hotspots_beats.csv`
+            - `.data/01-processed/step3_hotspots_beat_season.csv`
+            - `.data/01-processed/step3_forecast_predictions.csv`
+            - `.data/01-processed/step3_forecast_metrics.csv`
+            - `.data/01-processed/step4_resource_deployment.csv ` - (base allocation table used by Step 4)
+    - Visualization Functions:
+
+        | # | Function | Output file | Description |
+        |---|---|---|---|
+        | 1 | `Top-3 hotspot beats: actual calls (test window)` | `./data/01-processed/step3_actual_calls_top3.png` | Line plot of actual daily call counts for the top 3 hotspot beats over the test window. |
+        | 2 | `Top-3 hotspot beats: baseline ` | `./data/01-processed/step3_predicted_calls_top3.png` | Line plot of Baseline predicted daily call |
+        | 3 | `predicted calls (test window)` | `eda3_call_type.png` | counts for the top 3 hotspot beats over the test window |
+
+
