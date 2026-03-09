@@ -212,7 +212,6 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
         | # | Function | Output file | Description |
         |---|---|---|---|
         | 1 | `Top-3 hotspot beats: actual calls (test window)` | `./data/01-processed/step3_actual_calls_top3.png` | Line plot of actual daily call counts for the top 3 hotspot beats over the test window. |
-        | 2 | `Top-3 hotspot beats: baseline ` | `./data/01-processed/step3_predicted_calls_top3.png` | Line plot of Baseline predicted daily call |
-        | 3 | `predicted calls (test window)` | `eda3_call_type.png` | counts for the top 3 hotspot beats over the test window |
+        | 2 | `Top-3 hotspot beats: baseline predicted calls (test window) ` | `./data/01-processed/step3_predicted_calls_top3.png` | Line plot of baseline predicted daily call counts for the top 3 hotspot beats over the test window. |
 
 
