@@ -140,6 +140,43 @@ def add_call_type_category(
 
     return df2
 
+def add_high_risk_flag(df):
+    assert isinstance(df, pd.DataFrame) and len(df) > 0
+    df = df.copy()
+    lower_cols = {c.lower(): c for c in df.columns}
+
+    if "IS_HIGH_RISK" in df.columns:
+        s = df["IS_HIGH_RISK"]
+        if s.dtype == bool:
+            return df
+        else:
+            df["IS_HIGH_RISK"] = s.astype(str).str.strip().str.lower().isin(["1", "true", "yes", "y"]).astype(bool)
+        return df
+
+    if "priority" in lower_cols:
+        p = pd.to_numeric(df[lower_cols["priority"]], errors="coerce")
+        if p.notna().any():
+            df["IS_HIGH_RISK"] = (p <= 2).fillna(False).astype(bool)
+            return df
+
+    if "call_type" in lower_cols:
+        ct = df[lower_cols["call_type"]].astype(str).str.lower()
+        risky = (
+            ct.str.contains("weapon", na=False)
+            | ct.str.contains("gun", na=False)
+            | ct.str.contains("assault", na=False)
+            | ct.str.contains("robbery", na=False)
+            | ct.str.contains("burglary", na=False)
+            | ct.str.contains("domestic", na=False)
+            | ct.str.contains("shots", na=False)
+            | ct.str.contains("homicide", na=False)
+            | ct.str.contains("kidnap", na=False)
+        )
+        df["IS_HIGH_RISK"] = risky.astype(bool)
+        return df
+
+    df["IS_HIGH_RISK"] = False
+    return df
 
 def add_disposition_category_and_risk(
     df: pd.DataFrame,
@@ -148,82 +185,43 @@ def add_disposition_category_and_risk(
     risk_col: str = "IS_HIGH_RISK",
     drop_unmapped: bool = True,
 ) -> pd.DataFrame:
-    """
-    Map DISPOSITION codes to high-level DISPOSITION_CATEGORY and create IS_HIGH_RISK.
-    This matches your latest notebook naming.
-    """
     assert dispo_col in df.columns, f"Missing required column: {dispo_col}"
 
     df2 = df.copy()
-
-    # Normalize codes
     codes = df2[dispo_col].astype("string").str.strip().str.upper()
 
-    # Mapping based on your latest notebook version
     dispo_mapping = {
-        # Cancelled / No response
-        "W": "Cancelled",
-        "X": "Cancelled",
-        "CAN": "Cancelled",
-
-        # Duplicate
-        "DUP": "Duplicate",
-        "V": "Duplicate",
-
-        # Arrest
-        "A": "Arrest",
-        "AB": "Arrest",
-        "AHR": "Arrest",
-
-        # Report taken
-        "R": "Reported",
-        "RB": "Reported",
-        "RHR": "Reported",
-
-        # No report / No further action
-        "K": "Closed",
-        "KB": "Closed",
-        "KHR": "Closed",
-
-        # Unfounded
+        "W": "Cancelled", "X": "Cancelled", "CAN": "Cancelled",
+        "DUP": "Duplicate", "V": "Duplicate",
+        "A": "Arrest", "AB": "Arrest", "AHR": "Arrest",
+        "R": "Reported", "RB": "Reported", "RHR": "Reported",
+        "K": "Closed", "KB": "Closed", "KHR": "Closed",
         "U": "Unfounded",
-
-        # Vehicle-related outcome
         "S": "Vehicle",
-
-        # Other
-        "O": "Other",
-        "OHR": "Other",
+        "O": "Other", "OHR": "Other",
     }
 
-    # Apply mapping
     df2[out_col] = codes.map(dispo_mapping)
 
-    # High-risk flag: ends with "HR"
-    df2[risk_col] = codes.str.endswith("HR")
-
-    # Report mapping failure
     unmapped_mask = df2[out_col].isna()
     unmapped_n = int(unmapped_mask.sum())
     print(f"Number of unmapped rows ({out_col}): {unmapped_n}")
-
     if unmapped_n > 0:
         print("\nTop unmapped DISPOSITION values (count):")
         print(df2.loc[unmapped_mask, dispo_col].value_counts().head(30).to_string())
 
-    # Delete all rows with mapping failure
     if drop_unmapped:
         df2 = df2.loc[~unmapped_mask].copy()
     else:
         df2[out_col] = df2[out_col].fillna("unmapped_unknown")
 
-    # Post-conditions
+    df2 = add_high_risk_flag(df2)
+
     assert out_col in df2.columns, f"Failed to create {out_col}"
     assert df2[out_col].isna().sum() == 0, f"{out_col} still contains NaN values."
     assert risk_col in df2.columns, f"Failed to create {risk_col}"
 
     return df2
-
 
 def main() -> None:
     # ----- Paths you may want to change based on your system -----

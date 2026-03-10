@@ -89,6 +89,8 @@ def plot_hour_dow_heatmap(df, figsize=(12,5)):
     sns.heatmap(hd_group, cmap="YlOrRd", linewidths=0.3, linecolor="white", cbar_kws={"label":"Call Count"}, ax=ax)
 
     ax.set_title("Call Volume: Hour × Day of Week", fontsize=13)
+    ax.set_xlabel("Day of Week")
+    ax.set_ylabel("Hour")
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda1_hour_dow_heatmap.png"), dpi=150)
@@ -118,14 +120,18 @@ def plot_seasonal_monthly(df, figsize=(13,5)):
     _, axes = plt.subplots(1, 2, figsize=figsize)
 
     axes[0].bar(monthly["MONTH"], monthly["CALLS"], color=sns.color_palette("tab10",12), edgecolor="white")
-    axes[0].set_xticks(range(1,13)); axes[0].set_xticklabels(mlabels)
-    axes[0].set_title("Total Calls by Month"); axes[0].set_ylabel("Calls")
+    axes[0].set_xticks(range(1,13))
+    axes[0].set_xticklabels(mlabels)
+    axes[0].set_title("Total Calls by Month")
+    axes[0].set_ylabel("Calls")
+    axes[0].set_xlabel("Month")
 
     s_order = [s for s in SEASON_ORDER if s in daily_season["SEASON"].unique()]
     sns.boxplot(data=daily_season, x="SEASON", y="CALLS", order=s_order, palette="Set2", ax=axes[1], hue="SEASON", legend=False)
 
     axes[1].set_title("Daily Calls Distribution by Season")
     axes[1].set_ylabel("Calls per Day")
+    axes[1].set_xlabel("Season")
     plt.suptitle("Seasonal & Monthly Patterns", fontsize=13, y=1.01)
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda2_seasonal.png"), dpi=150, bbox_inches="tight")
@@ -159,7 +165,9 @@ def plot_call_type_distribution(df, top_n=20, figsize=(12,6)):
 
     ax.bar_label(bars, labels=pct_labels, padding=3, fontsize=8)
     ax.set_title(f"Top {top_n} Call Type Categories" if col == "CALL_TYPE_CATEGORY" else f"Top {top_n} Call Types", fontsize=13)
-    ax.set_xlabel("Count"); plt.tight_layout()
+    ax.set_xlabel("Count")
+    ax.set_ylabel("Call Type Category")
+    plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda3_call_type.png"), dpi=150)
     plt.show()
 
@@ -193,6 +201,9 @@ def plot_beat_hotspot(df, geojson_path, top_n=20, figsize=(12,5)):
     tick_labels = [f"{beat} ({beat_names.get(beat, '')})" for beat in counts.index]
     ax.set_xticks(range(len(counts)))
     ax.set_xticklabels(tick_labels, rotation=45, ha="right", fontsize=7)
+    ax.set_xlabel("Beat (Geographic Location)")
+    ax.set_ylabel("Count")
+
 
     plt.xticks(rotation=45); plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda4_beat_hotspot.png"), dpi=150)
@@ -221,7 +232,7 @@ def plot_priority_distribution(df, figsize=(11,4)):
     if "IS_HIGH_RISK" in df.columns:
         high  = int(df["IS_HIGH_RISK"].sum())
         other = int(len(df) - high)
-        risk_label = "High-Risk (HR disposition)"
+        risk_label = "High-Risk"
     else:
         high  = int((prio <= 2).sum())
         other = int((prio > 2).sum())
@@ -267,7 +278,9 @@ def plot_disposition(df, figsize=(11,5)):
         ax.text(bar.get_width() + counts.max()*0.01, bar.get_y() + bar.get_height()/2, f"{p:.1f}%", va="center", fontsize=8)
 
     ax.set_title("Disposition Category Distribution" if col == "DISPOSITION_CATEGORY" else "Top Dispositions", fontsize=13)
-    ax.set_xlabel("Count"); plt.tight_layout()
+    ax.set_xlabel("Count")
+    ax.set_ylabel("Disposition Category")
+    plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda6_disposition.png"), dpi=150)
     plt.show()
 
@@ -304,7 +317,7 @@ def plot_calltype_hour_heatmap(df, calltypes_path, top_n=12, figsize=(13, 6)):
 
     ax.set_title(f"Top {top_n} Call Types Share x Hour of Day",fontsize=12)
     ax.set_xlabel("Hour of Day")
-    ax.set_ylabel("Call Type")
+    ax.set_ylabel("Call Code (Description)")
 
     tick_labels = [f"{calltype} ({calltypes.get(calltype, calltype)})" for calltype in ch_group_norm.index]
     ax.set_yticklabels(tick_labels, rotation=0, fontsize=8)
