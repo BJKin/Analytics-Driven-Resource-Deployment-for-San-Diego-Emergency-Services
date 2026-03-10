@@ -4,38 +4,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import geopandas as gpd
 
+from step3_helper import add_time_features
+
 #### Parameters ###
 OUT_DR = "./data/EDA_outputs/"
 DOW_ORDER    = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 SEASON_ORDER = ["Spring","Summer","Fall","Winter"]
-
-#### Helpers ####
-def add_time_features(df):
-    '''
-    Adds HOUR / DOW / MONTH / SEASON / DATE from DATE_TIME column
-
-    Arguments
-    df-- input DataFrame
-
-    Retuns
-    df-- modified input DataFrame with
-    '''
-    assert isinstance(df, pd.DataFrame) and len(df) > 0
-    df["DATE_TIME"] = pd.to_datetime(df["DATE_TIME"])
-
-    if "HOUR" not in df.columns: df["HOUR"] = df["DATE_TIME"].dt.hour.astype(int)
-    if "DOW" not in df.columns: df["DOW"] = df["DATE_TIME"].dt.day_name()
-    if "MONTH" not in df.columns: df["MONTH"] = df["DATE_TIME"].dt.month.astype(int)
-    if "DATE" not in df.columns: df["DATE"] = df["DATE_TIME"].dt.date.astype(str)
-    if "SEASON" not in df.columns:
-        def seasonchecker(m):
-            if m in (3,4,5):    return "Spring"
-            if m in (6,7,8):    return "Summer"
-            if m in (9,10,11):  return "Fall"
-            return "Winter"
-        df["SEASON"] = df["MONTH"].apply(seasonchecker)
-
-    return df
 
 ### Display summary statistics ###
 def summary_stats(df):
@@ -51,7 +25,7 @@ def summary_stats(df):
     print(df.dtypes.to_string())
     print("=="*12)
     print("Numerical Summary")
-    print(df.describe().to_markdown())
+    print(df.describe().to_string())
 
 #### EDA Visualizations ####
 def plot_hour_dow_heatmap(df, figsize=(12,5)):
@@ -478,10 +452,7 @@ def main():
     GEOJSON = "./data/00-raw/pd_beats_datasd.geojson"
     CALLTYPES = "./data/00-raw/pd_cfs_calltypes_datasd.csv"
 
-    os.makedirs(OUT_DR, exist_ok=True)
-
     # ----- Load data -----
-    assert os.path.exists(DATA_CSV), f"Data file not found: {DATA_CSV}"
     df = pd.read_csv(DATA_CSV)
     print(f"Loaded {len(df):,} rows from {DATA_CSV}\n")
 

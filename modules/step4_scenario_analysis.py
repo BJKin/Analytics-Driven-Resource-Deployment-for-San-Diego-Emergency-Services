@@ -7,10 +7,10 @@ This script treats the existing Step 4 output as the base demand table and
 adds a lightweight scenario-analysis layer on top of it.
 
 Expected base allocation CSV columns (from current repo):
-    BEAT_KEY, AVG_CALLS, HIGH_RISK_RATIO, WEIGHTED_DEMAND, UNITS, SHIFT
+    BEAT, AVG_CALLS, HIGH_RISK_RATIO, WEIGHTED_DEMAND, UNITS, SHIFT
 
 Expected hotspot CSV columns:
-    BEAT_KEY, CALLS
+    BEAT, CALLS
 
 Outputs:
     - step4_scenario_allocations.csv
@@ -117,18 +117,18 @@ def load_base_step4_table(path: str | Path) -> pd.DataFrame:
         raise FileNotFoundError(f"Base step4 CSV not found: {path}")
 
     df = pd.read_csv(path)
-    required = {"BEAT_KEY", "AVG_CALLS", "HIGH_RISK_RATIO", "SHIFT"}
+    required = {"BEAT", "AVG_CALLS", "HIGH_RISK_RATIO", "SHIFT"}
     missing = required - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns in base step4 CSV: {sorted(missing)}")
 
     df = df.copy()
-    df["BEAT_KEY"] = df["BEAT_KEY"].astype(str).str.strip()
+    df["BEAT"] = df["BEAT"].astype(str).str.strip()
     df["SHIFT"] = pd.Categorical(df["SHIFT"], categories=SHIFT_ORDER, ordered=True)
     df["AVG_CALLS"] = pd.to_numeric(df["AVG_CALLS"], errors="coerce").fillna(0.0)
     df["HIGH_RISK_RATIO"] = pd.to_numeric(df["HIGH_RISK_RATIO"], errors="coerce").fillna(0.0).clip(0, 1)
-    df = df[df["BEAT_KEY"] != ""].copy()
-    df = df.sort_values(["SHIFT", "BEAT_KEY"]).reset_index(drop=True)
+    df = df[df["BEAT"] != ""].copy()
+    df = df.sort_values(["SHIFT", "BEAT"]).reset_index(drop=True)
     return df
 
 
@@ -139,12 +139,12 @@ def load_hotspot_set(path: str | Path, top_k: int) -> Set[str]:
         raise FileNotFoundError(f"Hotspot CSV not found: {path}")
 
     df = pd.read_csv(path)
-    if "BEAT_KEY" not in df.columns:
-        raise ValueError("Hotspot CSV must contain BEAT_KEY")
+    if "BEAT" not in df.columns:
+        raise ValueError("Hotspot CSV must contain BEAT")
     if "CALLS" in df.columns:
         df = df.sort_values("CALLS", ascending=False)
 
-    hotspot_set = set(df["BEAT_KEY"].astype(str).str.strip().head(top_k).tolist())
+    hotspot_set = set(df["BEAT"].astype(str).str.strip().head(top_k).tolist())
     if not hotspot_set:
         raise ValueError("Hotspot set is empty")
     return hotspot_set
@@ -170,8 +170,8 @@ def build_scenario_allocations(
         if sub.empty:
             continue
 
-        demand_status_quo = sub.set_index("BEAT_KEY")["AVG_CALLS"]
-        hotspot_mask = sub.set_index("BEAT_KEY").index.to_series().isin(hotspot_set)
+        demand_status_quo = sub.set_index("BEAT")["AVG_CALLS"]
+        hotspot_mask = sub.set_index("BEAT").index.to_series().isin(hotspot_set)
 
         for scenario_name, spec in scenario_specs:
             if scenario_name == "status_quo":
@@ -189,12 +189,12 @@ def build_scenario_allocations(
 
             else:
                 w = float(spec)
-                scenario_demand = sub.set_index("BEAT_KEY")["AVG_CALLS"] * (
-                    1.0 + (w - 1.0) * sub.set_index("BEAT_KEY")["HIGH_RISK_RATIO"]
+                scenario_demand = sub.set_index("BEAT")["AVG_CALLS"] * (
+                    1.0 + (w - 1.0) * sub.set_index("BEAT")["HIGH_RISK_RATIO"]
                 )
                 units = _allocate_proportional(scenario_demand, total_units)
 
-            frame = sub.set_index("BEAT_KEY")[["AVG_CALLS", "HIGH_RISK_RATIO"]].copy()
+            frame = sub.set_index("BEAT")[["AVG_CALLS", "HIGH_RISK_RATIO"]].copy()
             frame["SHIFT"] = shift
             frame["SCENARIO"] = scenario_name
             frame["SCENARIO_DEMAND"] = scenario_demand
@@ -297,11 +297,11 @@ def plot_top_beats_allocation(
         return
 
     top_beats = (
-        sub.groupby("BEAT_KEY")["AVG_CALLS"].mean().sort_values(ascending=False).head(top_n).index.tolist()
+        sub.groupby("BEAT")["AVG_CALLS"].mean().sort_values(ascending=False).head(top_n).index.tolist()
     )
     wide = (
-        sub[sub["BEAT_KEY"].isin(top_beats)]
-        .pivot_table(index="BEAT_KEY", columns="SCENARIO", values="UNITS", aggfunc="first")
+        sub[sub["BEAT"].isin(top_beats)]
+        .pivot_table(index="BEAT", columns="SCENARIO", values="UNITS", aggfunc="first")
         .fillna(0)
     )
     wide = wide.loc[top_beats]
@@ -315,7 +315,7 @@ def plot_top_beats_allocation(
         plt.bar(x + i * width, wide[col].values, width=width, label=col)
 
     plt.xticks(x + width * (n_scenarios - 1) / 2, wide.index.astype(str), rotation=0)
-    plt.xlabel("BEAT_KEY")
+    plt.xlabel("BEAT")
     plt.ylabel("Allocated units")
     plt.title(f"Top-{top_n} beat allocation comparison ({shift} shift)")
     plt.legend()

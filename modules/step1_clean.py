@@ -2,6 +2,7 @@ from typing import Union
 from pathlib import Path
 import os
 import pandas as pd
+from step3_helper import add_high_risk_flag
 
 # ----------------------------
 # Initial cleaning (from raw CSV)
@@ -146,54 +147,6 @@ def add_call_type_category(
     assert df2[out_col].isna().sum() == 0, f"{out_col} still contains NaN values."
 
     return df2
-
-def add_high_risk_flag(df):
-    '''
-    Adds a Boolean high risk flag column to the input DataFrame.
-    If a given row's call is considered to be high risk -> True, otherwise False.
-
-    Arguments:
-    df-- Input DataFrame
-
-    Returns:
-    df-- modified Input DataFrame with high risk flag column
-    '''
-    assert isinstance(df, pd.DataFrame) and len(df) > 0
-    df = df.copy()
-    lower_cols = {c.lower(): c for c in df.columns}
-
-    if "IS_HIGH_RISK" in df.columns:
-        s = df["IS_HIGH_RISK"]
-        if s.dtype == bool:
-            return df
-        else:
-            df["IS_HIGH_RISK"] = s.astype(str).str.strip().str.lower().isin(["1", "true", "yes", "y"]).astype(bool)
-        return df
-
-    if "priority" in lower_cols:
-        p = pd.to_numeric(df[lower_cols["priority"]], errors="coerce")
-        if p.notna().any():
-            df["IS_HIGH_RISK"] = (p <= 2).fillna(False).astype(bool)
-            return df
-
-    if "call_type" in lower_cols:
-        ct = df[lower_cols["call_type"]].astype(str).str.lower()
-        risky = (
-            ct.str.contains("weapon", na=False)
-            | ct.str.contains("gun", na=False)
-            | ct.str.contains("assault", na=False)
-            | ct.str.contains("robbery", na=False)
-            | ct.str.contains("burglary", na=False)
-            | ct.str.contains("domestic", na=False)
-            | ct.str.contains("shots", na=False)
-            | ct.str.contains("homicide", na=False)
-            | ct.str.contains("kidnap", na=False)
-        )
-        df["IS_HIGH_RISK"] = risky.astype(bool)
-        return df
-
-    df["IS_HIGH_RISK"] = False
-    return df
 
 def add_disposition_category_and_risk(
     df: pd.DataFrame,

@@ -1,31 +1,6 @@
 import os
 import math
-import random
 import pandas as pd
-
-
-def _find_col(df, candidates):
-    for c in candidates:
-        if c in df.columns:
-            return c
-    lower_map = {c.lower(): c for c in df.columns}
-    for c in candidates:
-        if c.lower() in lower_map:
-            return lower_map[c.lower()]
-    return None
-
-
-def _season_from_month(m):
-    assert isinstance(m, int)
-    assert 1 <= m <= 12
-    if m in (12, 1, 2):
-        return "Winter"
-    if m in (3, 4, 5):
-        return "Spring"
-    if m in (6, 7, 8):
-        return "Summer"
-    return "Fall"
-
 
 def load_calls_csv(path):
     """Load calls-for-service CSV into a DataFrame."""
@@ -35,101 +10,64 @@ def load_calls_csv(path):
     assert isinstance(df, pd.DataFrame) and len(df) > 0
     return df
 
-
-def basic_clean_calls(df):
-    """
-    Basic cleaning mirroring the current notebook Step 1:
-    - Drop intersecting street columns if present
-    - Drop rows with missing key fields
-    """
-    assert isinstance(df, pd.DataFrame) and len(df) > 0
-    df = df.copy()
-
-    drop_cols = ["ADDRESS_DIR_INTERSECTING", "ADDRESS_ROAD_INTERSECTING", "ADDRESS_SFX_INTERSECTING"]
-    to_drop = [c for c in drop_cols if c in df.columns]
-    if len(to_drop) > 0:
-        df = df.drop(columns=to_drop)
-
-    required = []
-    for c in ["ADDRESS_ROAD_PRIMARY", "CALL_TYPE", "DISPOSITION"]:
-        if c in df.columns:
-            required.append(c)
-    if len(required) > 0:
-        df = df.dropna(subset=required).reset_index(drop=True)
-
-    assert len(df) > 0
-    return df
-
-
 def add_time_features(df):
-    """
-    Add standard time-derived columns:
-    - DATETIME (parsed)
-    - DATE (YYYY-MM-DD string)
-    - HOUR (0..23)
-    - DOW (Monday..Sunday)
-    - MONTH (1..12)
-    - SEASON (Winter/Spring/Summer/Fall)
-    """
+    '''
+    Adds HOUR / DOW / MONTH / SEASON / DATE from DATE_TIME column
+
+    Arguments
+    df-- input DataFrame
+
+    Retuns
+    df-- modified input DataFrame with
+    '''
     assert isinstance(df, pd.DataFrame) and len(df) > 0
-    df = df.copy()
+    df["DATE_TIME"] = pd.to_datetime(df["DATE_TIME"])
 
-    ts_col = _find_col(df, ["DATE_TIME", "Timestamp", "timestamp", "call_datetime", "datetime", "DATE"])
-    assert ts_col is not None
+    if "HOUR" not in df.columns: df["HOUR"] = df["DATE_TIME"].dt.hour.astype(int)
+    if "DOW" not in df.columns: df["DOW"] = df["DATE_TIME"].dt.day_name()
+    if "MONTH" not in df.columns: df["MONTH"] = df["DATE_TIME"].dt.month.astype(int)
+    if "DATE" not in df.columns: df["DATE"] = df["DATE_TIME"].dt.date.astype(str)
+    if "SEASON" not in df.columns:
+        def seasonchecker(m):
+            if m in (3,4,5):    return "Spring"
+            if m in (6,7,8):    return "Summer"
+            if m in (9,10,11):  return "Fall"
+            return "Winter"
+        df["SEASON"] = df["MONTH"].apply(seasonchecker)
 
-    dt = pd.to_datetime(df[ts_col], errors="coerce")
-    assert dt.notna().any()
-
-    df["DATETIME"] = dt
-    df = df[df["DATETIME"].notna()].copy()
-
-    df["DATE"] = df["DATETIME"].dt.date.astype(str)
-    df["HOUR"] = df["DATETIME"].dt.hour.astype(int)
-    df["DOW"] = df["DATETIME"].dt.day_name().astype(str)
-    df["MONTH"] = df["DATETIME"].dt.month.astype(int)
-    df["SEASON"] = df["MONTH"].apply(_season_from_month).astype(str)
     return df
-
-
-def add_beat_key(df):
-    """Create a normalized 'BEAT_KEY' column for grouping."""
-    assert isinstance(df, pd.DataFrame) and len(df) > 0
-    beat_col = _find_col(df, ["BEAT", "beat", "Beat", "pd_beat", "PD_BEAT", "sdpd_beat", "SDPD_BEAT"])
-    assert beat_col is not None
-    df = df.copy()
-    df["BEAT_KEY"] = df[beat_col].astype(str).str.strip()
-    df = df[df["BEAT_KEY"] != ""].copy()
-    assert len(df) > 0
-    return df
-
 
 def add_high_risk_flag(df):
-    """
-    Add IS_HIGH_RISK (0/1) using best-available signals:
-    - If PRIORITY exists: high risk if PRIORITY <= 2
-    - Else: keyword heuristic on CALL_TYPE
-    """
+    '''
+    Adds a Boolean high risk flag column to the input DataFrame.
+    If a given row's call is considered to be high risk -> True, otherwise False.
+
+    Arguments:
+    df-- Input DataFrame
+
+    Returns:
+    df-- modified Input DataFrame with high risk flag column
+    '''
     assert isinstance(df, pd.DataFrame) and len(df) > 0
     df = df.copy()
+    lower_cols = {c.lower(): c for c in df.columns}
 
     if "IS_HIGH_RISK" in df.columns:
         s = df["IS_HIGH_RISK"]
         if s.dtype == bool:
-            df["IS_HIGH_RISK"] = s.astype(int)
+            return df
         else:
-            df["IS_HIGH_RISK"] = s.astype(str).str.strip().str.lower().isin(["1", "true", "yes", "y"]).astype(int)
+            df["IS_HIGH_RISK"] = s.astype(str).str.strip().str.lower().isin(["1", "true", "yes", "y"]).astype(bool)
         return df
 
-    pr_col = _find_col(df, ["PRIORITY", "priority", "Priority"])
-    if pr_col is not None:
-        p = pd.to_numeric(df[pr_col], errors="coerce")
+    if "priority" in lower_cols:
+        p = pd.to_numeric(df[lower_cols["priority"]], errors="coerce")
         if p.notna().any():
-            df["IS_HIGH_RISK"] = (p <= 2).fillna(False).astype(int)
+            df["IS_HIGH_RISK"] = (p <= 2).fillna(False).astype(bool)
             return df
 
-    ct_col = _find_col(df, ["CALL_TYPE", "call_type", "Call Type"])
-    if ct_col is not None:
-        ct = df[ct_col].astype(str).str.lower()
+    if "call_type" in lower_cols:
+        ct = df[lower_cols["call_type"]].astype(str).str.lower()
         risky = (
             ct.str.contains("weapon", na=False)
             | ct.str.contains("gun", na=False)
@@ -141,22 +79,21 @@ def add_high_risk_flag(df):
             | ct.str.contains("homicide", na=False)
             | ct.str.contains("kidnap", na=False)
         )
-        df["IS_HIGH_RISK"] = risky.astype(int)
+        df["IS_HIGH_RISK"] = risky.astype(bool)
         return df
 
-    df["IS_HIGH_RISK"] = 0
+    df["IS_HIGH_RISK"] = False
     return df
 
 
 def build_features_v2_from_processed(processed_csv, out_csv=None):
     """
     Build a Step3/4-ready dataset from the already-cleaned CSV:
-    Adds time features, BEAT_KEY, and IS_HIGH_RISK.
+    Adds time features, BEAT, and IS_HIGH_RISK.
     If out_csv is provided, saves the result.
     """
     df = load_calls_csv(processed_csv)
     df = add_time_features(df)
-    df = add_beat_key(df)
     df = add_high_risk_flag(df)
     if out_csv is not None:
         assert isinstance(out_csv, str) and len(out_csv) > 0
@@ -169,15 +106,15 @@ def step3_hotspots(df):
     """
     Step 3A: Hotspots.
     Returns:
-      - beat_counts: DataFrame indexed by BEAT_KEY with CALLS column
-      - beat_season: DataFrame with BEAT_KEY, SEASON, CALLS
+      - beat_counts: DataFrame indexed by BEAT with CALLS column
+      - beat_season: DataFrame with BEAT, SEASON, CALLS
     """
     assert isinstance(df, pd.DataFrame) and len(df) > 0
-    assert "BEAT_KEY" in df.columns
+    assert "BEAT" in df.columns
     assert "SEASON" in df.columns
 
-    beat_counts = df.groupby("BEAT_KEY").size().sort_values(ascending=False).to_frame("CALLS")
-    beat_season = df.groupby(["BEAT_KEY", "SEASON"]).size().to_frame("CALLS").reset_index()
+    beat_counts = df.groupby("BEAT").size().sort_values(ascending=False).to_frame("CALLS")
+    beat_season = df.groupby(["BEAT", "SEASON"]).size().to_frame("CALLS").reset_index()
     return beat_counts, beat_season
 
 
@@ -196,32 +133,32 @@ def _train_test_split_by_date(df, test_days=14):
 def step3_baseline_forecast(df, test_days=14):
     """
     Step 3B: Baseline forecasting (beat-by-hour).
-    Baseline = average calls per (BEAT_KEY, HOUR, DOW) on train set.
+    Baseline = average calls per (BEAT, HOUR, DOW) on train set.
     Evaluates on last `test_days` dates.
     Returns:
-      pred_df: DATE, BEAT_KEY, HOUR, DOW, ACTUAL_CALLS, PRED_CALLS
+      pred_df: DATE, BEAT, HOUR, DOW, ACTUAL_CALLS, PRED_CALLS
       metrics: dict with MAE and RMSE
     """
     assert isinstance(df, pd.DataFrame) and len(df) > 0
-    for c in ["BEAT_KEY", "HOUR", "DOW", "DATE"]:
+    for c in ["BEAT", "HOUR", "DOW", "DATE"]:
         assert c in df.columns
 
     train, test = _train_test_split_by_date(df, test_days=test_days)
     train_daily = (
-        train.groupby(["DATE", "BEAT_KEY", "HOUR", "DOW"])
+        train.groupby(["DATE", "BEAT", "HOUR", "DOW"])
         .size()
         .to_frame("DAILY_CALLS")
         .reset_index()
     )
     train_mean = (
-        train_daily.groupby(["BEAT_KEY", "HOUR", "DOW"])["DAILY_CALLS"]
+        train_daily.groupby(["BEAT", "HOUR", "DOW"])["DAILY_CALLS"]
         .mean()
         .to_frame("MEAN_DAILY_CALLS")
         .reset_index()
     )
 
-    test_actual = test.groupby(["DATE", "BEAT_KEY", "HOUR", "DOW"]).size().to_frame("ACTUAL_CALLS").reset_index()
-    pred = test_actual.merge(train_mean, on=["BEAT_KEY", "HOUR", "DOW"], how="left")
+    test_actual = test.groupby(["DATE", "BEAT", "HOUR", "DOW"]).size().to_frame("ACTUAL_CALLS").reset_index()
+    pred = test_actual.merge(train_mean, on=["BEAT", "HOUR", "DOW"], how="left")
     pred["MEAN_DAILY_CALLS"] = pred["MEAN_DAILY_CALLS"].fillna(0.0)
     pred["PRED_CALLS"] = pred["MEAN_DAILY_CALLS"]
 
@@ -261,10 +198,10 @@ def step4_resource_deployment(df, total_units=50, high_risk_weight=1.5):
     Shifts:
       Night: 00-07, Day: 08-15, Evening: 16-23
     Returns allocation DataFrame with columns:
-      BEAT_KEY, SHIFT, AVG_CALLS, HIGH_RISK_RATIO, WEIGHTED_DEMAND, UNITS
+      BEAT, SHIFT, AVG_CALLS, HIGH_RISK_RATIO, WEIGHTED_DEMAND, UNITS
     """
     assert isinstance(df, pd.DataFrame) and len(df) > 0
-    for c in ["BEAT_KEY", "HOUR", "DATE", "IS_HIGH_RISK"]:
+    for c in ["BEAT", "HOUR", "DATE", "IS_HIGH_RISK"]:
         assert c in df.columns
     assert isinstance(total_units, int) and total_units > 0
     assert isinstance(high_risk_weight, (int, float)) and float(high_risk_weight) >= 1.0
@@ -279,11 +216,11 @@ def step4_resource_deployment(df, total_units=50, high_risk_weight=1.5):
     tmp = df.copy()
     tmp["SHIFT"] = tmp["HOUR"].apply(shift_from_hour).astype(str)
 
-    daily_calls = tmp.groupby(["DATE", "BEAT_KEY", "SHIFT"]).size().to_frame("CALLS").reset_index()
-    avg_calls = daily_calls.groupby(["BEAT_KEY", "SHIFT"])["CALLS"].mean().to_frame("AVG_CALLS").reset_index()
-    risk_ratio = tmp.groupby(["BEAT_KEY", "SHIFT"])["IS_HIGH_RISK"].mean().to_frame("HIGH_RISK_RATIO").reset_index()
+    daily_calls = tmp.groupby(["DATE", "BEAT", "SHIFT"]).size().to_frame("CALLS").reset_index()
+    avg_calls = daily_calls.groupby(["BEAT", "SHIFT"])["CALLS"].mean().to_frame("AVG_CALLS").reset_index()
+    risk_ratio = tmp.groupby(["BEAT", "SHIFT"])["IS_HIGH_RISK"].mean().to_frame("HIGH_RISK_RATIO").reset_index()
 
-    merged = avg_calls.merge(risk_ratio, on=["BEAT_KEY", "SHIFT"], how="left")
+    merged = avg_calls.merge(risk_ratio, on=["BEAT", "SHIFT"], how="left")
     merged["HIGH_RISK_RATIO"] = merged["HIGH_RISK_RATIO"].fillna(0.0)
     merged["WEIGHTED_DEMAND"] = merged["AVG_CALLS"] * (1.0 + (float(high_risk_weight) - 1.0) * merged["HIGH_RISK_RATIO"])
 
@@ -291,8 +228,8 @@ def step4_resource_deployment(df, total_units=50, high_risk_weight=1.5):
     for shift in ["Night", "Day", "Evening"]:
         sub = merged[merged["SHIFT"] == shift].copy()
         assert len(sub) > 0
-        alloc = _allocate_proportional(sub.set_index("BEAT_KEY")["WEIGHTED_DEMAND"], total_units)
-        out = sub.set_index("BEAT_KEY")[["AVG_CALLS", "HIGH_RISK_RATIO", "WEIGHTED_DEMAND"]].copy()
+        alloc = _allocate_proportional(sub.set_index("BEAT")["WEIGHTED_DEMAND"], total_units)
+        out = sub.set_index("BEAT")[["AVG_CALLS", "HIGH_RISK_RATIO", "WEIGHTED_DEMAND"]].copy()
         out["UNITS"] = alloc
         out = out.reset_index()
         out["SHIFT"] = shift

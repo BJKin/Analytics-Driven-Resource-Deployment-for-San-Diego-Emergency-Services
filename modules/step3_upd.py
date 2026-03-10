@@ -39,7 +39,7 @@ def main():
     beats_gdf = gpd.read_file(DATA_BEATS)
     valid_beats = set(beats_gdf["beat"].astype(str).str.strip())
 
-    df_v2 = df_v2[df_v2["BEAT_KEY"].astype(str).str.strip().isin(valid_beats)].copy()
+    df_v2 = df_v2[df_v2["BEAT"].astype(str).str.strip().isin(valid_beats)].copy()
     print(df_v2.head())
     print(f"Shape: {df_v2.shape}\n")
 
@@ -99,13 +99,13 @@ def main():
     print("Generating visualizations...")
 
     top_beats = list(beat_counts.head(3).index)
-    viz = pred_df[pred_df["BEAT_KEY"].isin(top_beats)].copy()
-    viz_agg = viz.groupby(["DATE", "BEAT_KEY"])[["ACTUAL_CALLS", "PRED_CALLS"]].sum().reset_index()
+    viz = pred_df[pred_df["BEAT"].isin(top_beats)].copy()
+    viz_agg = viz.groupby(["DATE", "BEAT"])[["ACTUAL_CALLS", "PRED_CALLS"]].sum().reset_index()
     print(viz_agg.head())
 
     # Plot 1: Actual calls
     plt.figure(figsize=(12, 5))
-    sns.lineplot(data=viz_agg, x="DATE", y="ACTUAL_CALLS", hue="BEAT_KEY", legend=True)
+    sns.lineplot(data=viz_agg, x="DATE", y="ACTUAL_CALLS", hue="BEAT", legend=True)
     plt.xticks(rotation=45)
     plt.title("Step 3B: Actual calls (Top 3 hotspot beats, test window)")
     plt.tight_layout()
@@ -114,7 +114,7 @@ def main():
 
     # Plot 2: Predicted calls
     plt.figure(figsize=(12, 5))
-    sns.lineplot(data=viz_agg, x="DATE", y="PRED_CALLS", hue="BEAT_KEY", legend=True)
+    sns.lineplot(data=viz_agg, x="DATE", y="PRED_CALLS", hue="BEAT", legend=True)
     plt.xticks(rotation=45)
     plt.title("Step 3B: Baseline predicted calls (Top 3 hotspot beats, test window)")
     plt.tight_layout()
