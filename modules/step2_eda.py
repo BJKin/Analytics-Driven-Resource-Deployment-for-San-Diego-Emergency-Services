@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import seaborn as sns
+import geopandas as gpd
 
 #### Parameters ###
 
@@ -162,7 +163,7 @@ def plot_call_type_distribution(df, top_n=20, figsize=(12,6)):
     plt.savefig(os.path.join(OUT_DR, "eda3_call_type.png"), dpi=150)
     plt.show()
 
-def plot_beat_hotspot(df, top_n=20, figsize=(12,5)):
+def plot_beat_hotspot(df, geojson_path, top_n=20, figsize=(12,5)):
     '''
     Visualizes the highest volume patrol beats (geographic hotspots).
     For assessing resource allocation and identifying areas requiring increased patrol presence.
@@ -176,6 +177,9 @@ def plot_beat_hotspot(df, top_n=20, figsize=(12,5)):
     Returns
     N/A
     '''
+    SD_beats_df = gpd.GeoDataFrame.from_file(geojson_path)
+    beat_names = SD_beats_df.set_index("beat")["name"].to_dict()
+
     counts = df.groupby("BEAT").size().sort_values(ascending=False).head(top_n)
 
     _, ax = plt.subplots(figsize=figsize)
@@ -186,7 +190,10 @@ def plot_beat_hotspot(df, top_n=20, figsize=(12,5)):
 
     ax.bar_label(bars, labels=pct_labels, padding=3, fontsize=8)
     ax.set_title(f"Top {top_n} Beats by Call Volume", fontsize=13)
-    ax.set_xlabel("Beat"); ax.set_ylabel("Calls")
+    tick_labels = [f"{beat} ({beat_names.get(beat, '')})" for beat in counts.index]
+    ax.set_xticks(range(len(counts)))
+    ax.set_xticklabels(tick_labels, rotation=45, ha="right", fontsize=7)
+
     plt.xticks(rotation=45); plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda4_beat_hotspot.png"), dpi=150)
     plt.show()
@@ -264,7 +271,7 @@ def plot_disposition(df, figsize=(11,5)):
     plt.savefig(os.path.join(OUT_DR, "eda6_disposition.png"), dpi=150)
     plt.show()
 
-def plot_calltype_hour_heatmap(df, top_n=12, figsize=(13, 6)):
+def plot_calltype_hour_heatmap(df, calltypes_path, top_n=12, figsize=(13, 6)):
     '''
     Heatmap of Top-N call types x hour of day (row-normalized).
     Useful for understanding if certain incident types require time-targeted resourcing.
@@ -281,8 +288,10 @@ def plot_calltype_hour_heatmap(df, top_n=12, figsize=(13, 6)):
     assert isinstance(df, pd.DataFrame) and len(df) > 0
     assert "CALL_TYPE" in df.columns
 
-    df = add_time_features(df)
+    map_df = pd.read_csv(calltypes_path)
+    calltypes = map_df.set_index("call_type")["description"].to_dict()
 
+    df = add_time_features(df)
     top_types = df["CALL_TYPE"].value_counts().head(top_n).index
     sub = df[df["CALL_TYPE"].isin(top_types)]
 
@@ -296,6 +305,11 @@ def plot_calltype_hour_heatmap(df, top_n=12, figsize=(13, 6)):
     ax.set_title(f"Top {top_n} Call Types Share x Hour of Day",fontsize=12)
     ax.set_xlabel("Hour of Day")
     ax.set_ylabel("Call Type")
+
+    tick_labels = [f"{calltype} ({calltypes.get(calltype, calltype)})" for calltype in ch_group_norm.index]
+    ax.set_yticklabels(tick_labels, rotation=0, fontsize=8)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+
     ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda7_calltype_hour_heatmap.png"), dpi=150)
@@ -429,7 +443,6 @@ def plot_beat_choropleth(df, geojson_path, figsize=(12,10)):
     Returns
     N/A
     '''
-    import geopandas as gpd
 
     SD_beats_df = gpd.GeoDataFrame.from_file(geojson_path)
     call_counts = df['BEAT'].value_counts().to_frame().reset_index()
@@ -460,8 +473,9 @@ def main():
     Reads the cleaned_v2 CSV, creates output directory, and saves all figures.
     """
     # ----- Paths you may want to change based on your system -----
-    DATA_CSV    = "./data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv"
-    GEOJSON     = "./data/00-raw/pd_beats_datasd.geojson"
+    DATA_CSV = "./data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv"
+    GEOJSON = "./data/00-raw/pd_beats_datasd.geojson"
+    CALLTYPES = "./data/00-raw/pd_cfs_calltypes_datasd.csv"
 
     os.makedirs(OUT_DR, exist_ok=True)
 
@@ -477,10 +491,10 @@ def main():
     plot_hour_dow_heatmap(df)
     plot_seasonal_monthly(df)
     plot_call_type_distribution(df)
-    plot_beat_hotspot(df)
+    plot_beat_hotspot(df, GEOJSON)
     plot_priority_distribution(df)
     plot_disposition(df)
-    plot_calltype_hour_heatmap(df)
+    plot_calltype_hour_heatmap(df, CALLTYPES)
     plot_category_by_season(df)
     plot_disposition_pareto(df)
     plot_daily_timeseries(df)
