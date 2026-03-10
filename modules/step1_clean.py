@@ -1,20 +1,7 @@
-import re
 from typing import Union
 from pathlib import Path
 import os
 import pandas as pd
-
-# ----------------------------
-# Utility functions
-# ----------------------------
-
-def ensure_parent_dir(file_path: Union[str, Path]) -> None:
-    """Create parent directory if it does not exist."""
-    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-
-# ----------------------------
-# Core pipeline
-# ----------------------------
 
 # ----------------------------
 # Initial cleaning (from raw CSV)
@@ -70,10 +57,20 @@ def clean_data(file: str, columns_to_remove=[], columns_to_clean=[]) -> pd.DataF
 
     return df_cleaned
 
+# ----------------------------
+# Core pipeline
+# ----------------------------
+
 def build_calltype_mapping(mapping_csv_path: Union[str, Path]) -> dict:
     """
     Read mapping table CSV and build a dict:
     CALL_TYPE (call_type column) -> category (3rd column).
+
+    Arguments:
+    mapping_csv_path-- path to .csv with mappings
+
+    Returns:
+    calltype_mapping-- dictionary with call type mappings
     """
     map_df = pd.read_csv(mapping_csv_path)
 
@@ -109,6 +106,16 @@ def add_call_type_category(
     """
     Add CALL_TYPE_CATEGORY via mapping dict.
     Optionally drop rows where mapping fails.
+
+    Arguments:
+    df-- Input DataFrame
+    calltype_mapping-- Dictionary that maps call type to a high level category
+    call_type_col-- Name of call type column (default is "CALL_TYPE")
+    out_col-- Name of column that stores call type high level category (default is "CALL_TYPE_CATEGORY")
+    drop_unmapped-- Drop any unmapped rows (default is True)
+
+    Returns:
+    df2-- Modified input DataFrame with added call type high level category column
     """
     assert call_type_col in df.columns, f"Missing required column: {call_type_col}"
 
@@ -141,6 +148,16 @@ def add_call_type_category(
     return df2
 
 def add_high_risk_flag(df):
+    '''
+    Adds a Boolean high risk flag column to the input DataFrame.
+    If a given row's call is considered to be high risk -> True, otherwise False.
+
+    Arguments:
+    df-- Input DataFrame
+
+    Returns:
+    df-- modified Input DataFrame with high risk flag column
+    '''
     assert isinstance(df, pd.DataFrame) and len(df) > 0
     df = df.copy()
     lower_cols = {c.lower(): c for c in df.columns}
@@ -185,6 +202,20 @@ def add_disposition_category_and_risk(
     risk_col: str = "IS_HIGH_RISK",
     drop_unmapped: bool = True,
 ) -> pd.DataFrame:
+    '''
+    Adds a high level disposition category column to the input DataFrame.
+    Calls add_high_risk_flag() to add a Boolean high risk flag column to the input DataFrame.
+
+    Arguments:
+    df-- Input DataFrame
+    dispo_col-- Name of disposition column (default is "DISPOSITION")
+    out_col-- Name of column that stores high level disposition category (default is "DISPOSITION_CATEGORY")
+    drop_unmapped-- Drop any unmapped rows (default is True)
+
+    Returns:
+    df2-- Modified input DataFrame with added call type high level category column
+    """
+    '''
     assert dispo_col in df.columns, f"Missing required column: {dispo_col}"
 
     df2 = df.copy()
@@ -224,7 +255,7 @@ def add_disposition_category_and_risk(
     return df2
 
 def main() -> None:
-    # ----- Paths you may want to change based on your system -----
+    # ----- Paths -----
     raw_csv_path = "./data/00-raw/pd_calls_for_service_2025_datasd.csv"
     mapping_csv_path = "./data/00-raw/calltypes_category_mapping_table.csv"
     cleaned_intermediate_path = "./data/01-processed/df_cleaned.csv"
@@ -236,22 +267,13 @@ def main() -> None:
     columns_to_clean = ['ADDRESS_ROAD_PRIMARY', 'CALL_TYPE', 'DISPOSITION']
     df_cleaned = clean_data(raw_csv_path, columns_to_remove, columns_to_clean)
 
-    # Export intermediate result (so downstream notebooks can still use it)
-    ensure_parent_dir(cleaned_intermediate_path)
+    # Export intermediate result
     df_cleaned.to_csv(cleaned_intermediate_path, index=False)
     print(f"Saved intermediate cleaned CSV to: {cleaned_intermediate_path}\n")
 
-    # Basic schema assertions
-    required_cols = ["CALL_TYPE", "DISPOSITION"]
-    for c in required_cols:
-        assert c in df_cleaned.columns, f"Missing required column in input CSV: {c}"
-
     # ----- Further cleaning (category mapping + risk flag) -----
     print("Further cleaning (categories + risk flag)")
-
-    assert Path(mapping_csv_path).exists(), f"Mapping table not found: {mapping_csv_path}"
     calltype_mapping = build_calltype_mapping(mapping_csv_path)
-
     df_cleaned_v2 = df_cleaned.copy()
 
     df_cleaned_v2 = add_call_type_category(
@@ -271,7 +293,6 @@ def main() -> None:
     )
 
     # ----- Export -----
-    ensure_parent_dir(out_path)
     df_cleaned_v2.to_csv(out_path, index=False)
 
     print(f"\nTotal observations after all cleaning: {len(df_cleaned_v2)}")

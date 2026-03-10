@@ -1,20 +1,10 @@
-'''
-"eda_upd.py": additional updated EDA methods
-Including following moudles for EDAs.
-
-This file is based on the modules/main.py
-'''
-import tabulate as tb
 import os
-import math
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 import seaborn as sns
 import geopandas as gpd
 
 #### Parameters ###
-
 OUT_DR = "./data/EDA_outputs/"
 DOW_ORDER    = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 SEASON_ORDER = ["Spring","Summer","Fall","Winter"]
@@ -47,7 +37,7 @@ def add_time_features(df):
 
     return df
 
-# Simplified method
+### Display summary statistics ###
 def summary_stats(df):
     '''
     Print summary statistics
@@ -64,7 +54,6 @@ def summary_stats(df):
     print(df.describe().to_markdown())
 
 #### EDA Visualizations ####
-
 def plot_hour_dow_heatmap(df, figsize=(12,5)):
     '''
     Generates a heatmap of call volumes by Hour of Day and Day of Week.
@@ -164,7 +153,7 @@ def plot_call_type_distribution(df, top_n=20, figsize=(12,6)):
     pct_labels = [f"{v/total:.1%}" for v in counts.values]
 
     ax.bar_label(bars, labels=pct_labels, padding=3, fontsize=8)
-    ax.set_title(f"Top {top_n} Call Type Categories" if col == "CALL_TYPE_CATEGORY" else f"Top {top_n} Call Types", fontsize=13)
+    ax.set_title(f"Call Type Category Distribution" if col == "CALL_TYPE_CATEGORY" else f"Top {top_n} Call Types", fontsize=13)
     ax.set_xlabel("Count")
     ax.set_ylabel("Call Type Category")
     plt.tight_layout()
@@ -204,9 +193,10 @@ def plot_beat_hotspot(df, geojson_path, top_n=20, figsize=(12,5)):
     ax.set_xlabel("Beat (Geographic Location)")
     ax.set_ylabel("Count")
 
-
-    plt.xticks(rotation=45); plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DR, "eda4_beat_hotspot.png"), dpi=150)
+    plt.xticks(rotation=45, ha="right", fontsize=8)
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.1)
+    plt.savefig(os.path.join(OUT_DR, "eda4_beat_hotspot.png"), dpi=150, bbox_inches="tight")
     plt.show()
 
 def plot_priority_distribution(df, figsize=(11,4)):
@@ -228,7 +218,6 @@ def plot_priority_distribution(df, figsize=(11,4)):
     prio = pd.to_numeric(df["PRIORITY"], errors="coerce").dropna()
     counts = prio.value_counts().sort_index()
 
-    # Use IS_HIGH_RISK from clean_further if available; otherwise fall back to priority threshold
     if "IS_HIGH_RISK" in df.columns:
         high  = int(df["IS_HIGH_RISK"].sum())
         other = int(len(df) - high)
@@ -309,7 +298,6 @@ def plot_calltype_hour_heatmap(df, calltypes_path, top_n=12, figsize=(13, 6)):
     sub = df[df["CALL_TYPE"].isin(top_types)]
 
     ch_group = (sub.groupby(["CALL_TYPE", "HOUR"]).size().unstack("HOUR").fillna(0))
-    # normalize: colour shows hourly shape, not absolute volume
     ch_group_norm = ch_group.div(ch_group.sum(axis=1), axis=0)
 
     _, ax = plt.subplots(figsize=figsize)
@@ -474,7 +462,7 @@ def plot_beat_choropleth(df, geojson_path, figsize=(12,10)):
     SD_beats_df.plot(column='count', cmap='magma', legend=True, ax=ax2)
     ax2.set_xlim([-117.20, -117.08])
     ax2.set_ylim([32.68, 32.75])
-    ax2.set_title('San Diego Emergency Calls by Beat- highest call density')
+    ax2.set_title('San Diego Emergency Calls by Beat- Highest Call Density')
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DR, "eda12_beat_highest_density_choropleth.png"), dpi=150)
     plt.show()
@@ -485,7 +473,7 @@ def main():
     Run all EDA plots end-to-end.
     Reads the cleaned_v2 CSV, creates output directory, and saves all figures.
     """
-    # ----- Paths you may want to change based on your system -----
+    # ----- Paths -----
     DATA_CSV = "./data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv"
     GEOJSON = "./data/00-raw/pd_beats_datasd.geojson"
     CALLTYPES = "./data/00-raw/pd_cfs_calltypes_datasd.csv"
