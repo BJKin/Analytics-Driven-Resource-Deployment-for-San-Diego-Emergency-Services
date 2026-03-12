@@ -224,3 +224,103 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
         | 1 | `main()` | `step3_actual_calls_top3.png` | Saves a line plot of actual daily calls for the top-3 hotspot beats over the test window.  |
         | 2 | ` ` | `step3_predicted_calls_top3.png` | Saves a line plot of baseline predicted daily calls for the top-3 hotspot beats over the test window.  |
 
+
+
+## Step 4 : Scenario Analysis for Resource Deployment
+
+### Description
+
+It generates multiple deployment policies (scenarios), evaluates them with **proxy operational metrics** (coverage/shortfall under a simplified capacity assumption), and outputs **CSV summaries + plots** for reporting.
+
+------
+
+### Inputs (required files)
+
+- `data/01-processed/step4_resource_deployment.csv`
+  Base beat×shift demand summary table used as Step 4 upgrade input (contains `BEAT_KEY`, `SHIFT`, `AVG_CALLS`, `HIGH_RISK_RATIO`).
+  *Impact:* determines the baseline demand distribution; all scenarios allocate units based on this table.
+- `data/01-processed/step3_hotspots_beats.csv`
+  Step 3 hotspot ranking table (used to select Top-K hotspot beats for the hotspot-protect scenario).
+  *Impact:* changes which beats receive minimum guaranteed units under hotspot-protect.
+
+------
+
+### Core Pipeline Functions (Called by `step4_scenario_analysis.py`)
+
+| #    | Function                       | Output file                                                  | Description                                                  |
+| ---- | ------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1    | `build_scenario_allocations()` | `step4_scenario_allocations.csv`                             | Builds beat×shift allocations for each scenario: `status_quo`, `risk_aware_{w}`, `hotspot_protect_topK_minM`. |
+| 2    | `add_capacity_metrics()`       | `step4_scenario_allocations.csv` (updated)                   | Adds simplified capacity model + proxy KPIs: `CAPACITY`, `COVERAGE`, `SHORTFALL` for every beat×shift×scenario row. |
+| 3    | `summarize_scenarios()`        | `step4_scenario_summary.csv`                                 | Aggregates metrics into one row per scenario (e.g., `coverage_ratio`, `total_shortfall`, `peak_shortfall`, `hotspot_shortfall`). |
+| 4    | `plot_summary_bars()`          | `scenario_coverage_ratio.png`, `scenario_total_shortfall.png` | Saves comparison bar charts for coverage ratio and total shortfall across scenarios. |
+| 5    | `plot_top_beats_allocation()`  | `allocation_top_beats_<shift>.png`                           | Saves grouped bar chart comparing how top-demand beats are allocated across scenarios (for a selected shift, default `Day`). |
+
+------
+
+### Scenarios Implemented
+
+- `status_quo`: allocate proportional to `AVG_CALLS`
+- `risk_aware_{w}`: allocate proportional to `AVG_CALLS * (1 + (w-1) * HIGH_RISK_RATIO)` (default `w ∈ {1.5, 2.0}`)
+- `hotspot_protect_topK_minM`: top-K hotspot beats get at least M units per shift (default `K=5`, `M=2`), remaining units allocated proportionally
+
+------
+
+### How to Run (with parameter meanings)
+
+```bash
+python modules/step4_scenario_analysis.py \
+  --base-allocation data/01-processed/step4_resource_deployment.csv \
+  --hotspots data/01-processed/step3_hotspots_beats.csv \
+  --outdir data/01-processed/step4_scenarios \
+  --total-units 50 \
+  --mu-per-hour 3.0 \
+  --risk-weights 1.5 2.0 \
+  --top-k 5 \
+  --min-units 2 \
+  --plot-shift Day
+```
+
+**Parameters (what it is / what it affects):**
+
+- `--base-allocation`
+  Base Step 4 table (beat×shift demand summary).
+  *Impact:* changes the demand inputs; allocations and metrics change accordingly.
+- `--hotspots`
+  Hotspot ranking table from Step 3.
+  *Impact:* determines which beats are treated as “hotspots” in hotspot-protect.
+- `--outdir`
+  Output folder for CSVs and plots.
+  *Impact:* does not change results, only where outputs are written.
+- `--total-units`
+  Total units available **per shift** (Night/Day/Evening).
+  *Impact:* higher values increase capacity, raise coverage ratio, reduce shortfall across all scenarios.
+- `--mu-per-hour`
+  Capacity assumption μ: calls handled per unit per hour.
+  *Impact:* higher μ increases capacity without changing allocations, improving coverage and reducing shortfall (proxy effect).
+- `--risk-weights`
+  High-risk multipliers used to build `risk_aware_{w}` scenarios (e.g., 1.5 and 2.0).
+  *Impact:* larger weights shift more units toward beats with higher `HIGH_RISK_RATIO`.
+- `--top-k`
+  Number of hotspot beats to protect in hotspot-protect.
+  *Impact:* larger K spreads guarantees across more beats; smaller K concentrates protection on fewer beats.
+- `--min-units`
+  Minimum guaranteed units per hotspot beat per shift (hotspot-protect).
+  *Impact:* larger values strengthen hotspot guarantees but reduce remaining units available for proportional allocation.
+- `--plot-shift`
+  Which shift to visualize in `allocation_top_beats_<shift>.png`.
+  *Impact:* affects only the saved plot (not the CSV metrics).
+
+------
+
+### Outputs written to `data/01-processed/step4_scenarios/`
+
+- `step4_scenario_allocations.csv`
+  Beat × shift × scenario **allocation detail table**. Each row is one `(BEAT_KEY, SHIFT, SCENARIO)` cell with allocated `UNITS` and proxy KPIs such as `CAPACITY`, `COVERAGE`, and `SHORTFALL`.
+- `step4_scenario_summary.csv`
+  **Scenario-level summary table** (one row per scenario), aggregating metrics like `coverage_ratio`, `total_shortfall`, `peak_shortfall` (top demand cells), and `hotspot_shortfall` (hotspot beats only). Used to quickly compare policy trade-offs.
+- `scenario_coverage_ratio.png`
+  Bar chart comparing **coverage ratio** across scenarios (`total_coverage / total_demand`), showing which policy covers more demand under the same resource budget.
+- `scenario_total_shortfall.png`
+  Bar chart comparing **total shortfall** across scenarios (`sum(max(0, demand - capacity))`), showing which policy leaves less unmet demand overall.
+- `allocation_top_beats_<shift>.png`
+  Grouped bar chart comparing allocations for **top-demand beats** in a selected shift (default `Day`), showing where each policy concentrates or redistributes `UNITS`.
