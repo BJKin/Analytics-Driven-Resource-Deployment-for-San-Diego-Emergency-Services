@@ -100,10 +100,54 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
 1. `pandas`
 2. `seaborn`
 3. `matplotlib`
-4. `tabulate`
-5. `geopandas`
+4. `geopandas`
+5.  `numpy`
+6.  `ipykernel`
 
 ## How to run the code
+- Initial onboarding
+    1. **Clone the repository**
+        ```bash
+        git clone https://github.com/BJKin/Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services.git
+        cd Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services
+        ```
+
+    2. **Ensure Python 3.10+ is installed**
+        ```bash
+        python --version   # should be 3.10 or higher
+        ```
+
+    3. **Create and activate a virtual environment**
+        ```bash
+        # Create the environment
+        python -m venv venv
+ 
+        # Activate on macOS/Linux
+        source venv/bin/activate
+ 
+        # Activate on Windows
+        venv\Scripts\activate
+        ```
+
+    4. **Install required packages**
+        ```bash
+        pip install pandas seaborn matplotlib geopandas numpy ipykernel
+        ```
+
+    5. **Configure the Jupyter kernel / Python interpreter**
+        - With the virtual environment activated, open `data_pipeline.ipynb` in your IDE
+        - Select the venv as the kernel/interpreter when prompted
+ 
+- Producing Results
+    - Option 1:
+        - Open the Jupyter Notebook `data_pipeline.ipynb`
+        - Run all cells from top to bottom
+            - The notebook executes the full pipeline (steps 1–4) sequentially and renders visualizations inline
+    - Option 2:
+        - Follow the steps below which offer a more in depth explanation, but produce the same results
+        - Run each step script in order: 
+            - `step1_clean.py` → `step2_eda.py` → `step3_forecasting.py` → `step4_scenario_analysis.py`
+                -  Each step depends on the output of the previous one
 
 ### Step 1-  Clean and process the Dataset from the Raw CSV
 - Navigate to the root directory and run the `step1_clean.py` script
@@ -164,8 +208,10 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
     ```
     - Generates **11 EDA visualizations** from the cleaned dataset
         - Input:
-            - `data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv`- Output of `step1_clean.py`
-            - `data/00-raw/pd_beats_datasd.geojson` - Beat boundary polygons
+            - `data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv`
+                - Output of `step1_clean.py`
+            - `data/00-raw/pd_beats_datasd.geojson` 
+                - Beat boundary polygons
         - Output:
             - All visualizations are saved to `./data/EDA_outputs/`
     - Visualization Functions:
@@ -183,6 +229,7 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
         | 9 | `plot_disposition_pareto` | `eda9_disposition_pareto.png` | Disposition Pareto chart with 80% line |
         | 10 | `plot_daily_timeseries` | `eda10_daily_timeseries.png` | Daily incident count time-series |
         | 11 | `plot_beat_choropleth` | `eda11_beat_choropleth.png` | Geographic heatmap by beat (requires GeoJSON) |
+        | 11 | `plot_beat_choropleth` | `eda12_beat_highest_density_choropleth.png` | Highest density area of previous choropleth |
 
     - Helper functions:
 
@@ -196,7 +243,7 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
     ```bash
     python modules/step3_forecasting.py
     ```
-    - Generates
+    - Generates baseline forecasting
         - Input:
             - `data/01-processed/pd_calls_for_service_2025_datasd_cleaned_v2.csv`- Output of `step1_clean.py`
             - `data/00-raw/pd_beats_datasd.geojson` - Beat boundary polygons
@@ -220,8 +267,8 @@ Analytics-Driven-Resource-Deployment-for-San-Diego-Emergency-Services/
     - Visualization Functions:
         | # | Function | Output file | Description |
         |---|---|---|---|
-        | 1 | `main()` | `step3_actual_calls_top3.png` | Saves a line plot of actual daily calls for the top-3 hotspot beats over the test window.  |
-        | 2 | ` ` | `step3_predicted_calls_top3.png` | Saves a line plot of baseline predicted daily calls for the top-3 hotspot beats over the test window.  |
+        | 1 | `plot_beat_error_metrics()` | `step3_beat_error_metrics.png` | Plots the MAE and RSME per beat and flags the beat 521 as a outlier |
+        | 2 | `plot_actual_vs_predicted() ` | `step3_actual_vs_predicted.png` | For the top N hotspot beats: Left panel:  Actual vs Predicted overlay with shaded error band Right panel: Residual bar chart |
 
 
 

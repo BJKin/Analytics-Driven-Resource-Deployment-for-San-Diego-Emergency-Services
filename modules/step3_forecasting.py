@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import geopandas as gpd
+import matplotlib.patches as mpatches
 
 def load_calls_csv(path):
     """Load calls-for-service CSV into a DataFrame."""
@@ -133,15 +134,44 @@ def _train_test_split_by_date(df, test_days=14):
     return train, test
 
 
+# def step3_baseline_forecast(df, test_days=14):
+#     """
+#     Step 3B: Baseline forecasting (beat-by-hour).
+#     Baseline = average calls per (BEAT, HOUR, DOW) on train set.
+#     Evaluates on last `test_days` dates.
+#     Returns:
+#       pred_df: DATE, BEAT, HOUR, DOW, ACTUAL_CALLS, PRED_CALLS
+#       metrics: dict with MAE and RMSE
+#     """
+#     assert isinstance(df, pd.DataFrame) and len(df) > 0
+#     for c in ["BEAT", "HOUR", "DOW", "DATE"]:
+#         assert c in df.columns
+
+#     train, test = _train_test_split_by_date(df, test_days=test_days)
+#     train_daily = (
+#         train.groupby(["DATE", "BEAT", "HOUR", "DOW"])
+#         .size()
+#         .to_frame("DAILY_CALLS")
+#         .reset_index()
+#     )
+#     train_mean = (
+#         train_daily.groupby(["BEAT", "HOUR", "DOW"])["DAILY_CALLS"]
+#         .mean()
+#         .to_frame("MEAN_DAILY_CALLS")
+#         .reset_index()
+#     )
+
+#     test_actual = test.groupby(["DATE", "BEAT", "HOUR", "DOW"]).size().to_frame("ACTUAL_CALLS").reset_index()
+#     pred = test_actual.merge(train_mean, on=["BEAT", "HOUR", "DOW"], how="left")
+#     pred["MEAN_DAILY_CALLS"] = pred["MEAN_DAILY_CALLS"].fillna(0.0)
+#     pred["PRED_CALLS"] = pred["MEAN_DAILY_CALLS"]
+
+#     mae = (pred["ACTUAL_CALLS"] - pred["PRED_CALLS"]).abs().mean()
+#     rmse = math.sqrt(((pred["ACTUAL_CALLS"] - pred["PRED_CALLS"]) ** 2).mean())
+
+#     return pred, {"MAE": float(mae), "RMSE": float(rmse), "test_days": int(test_days)}
+
 def step3_baseline_forecast(df, test_days=14):
-    """
-    Step 3B: Baseline forecasting (beat-by-hour).
-    Baseline = average calls per (BEAT, HOUR, DOW) on train set.
-    Evaluates on last `test_days` dates.
-    Returns:
-      pred_df: DATE, BEAT, HOUR, DOW, ACTUAL_CALLS, PRED_CALLS
-      metrics: dict with MAE and RMSE
-    """
     assert isinstance(df, pd.DataFrame) and len(df) > 0
     for c in ["BEAT", "HOUR", "DOW", "DATE"]:
         assert c in df.columns
@@ -165,10 +195,125 @@ def step3_baseline_forecast(df, test_days=14):
     pred["MEAN_DAILY_CALLS"] = pred["MEAN_DAILY_CALLS"].fillna(0.0)
     pred["PRED_CALLS"] = pred["MEAN_DAILY_CALLS"]
 
-    mae = (pred["ACTUAL_CALLS"] - pred["PRED_CALLS"]).abs().mean()
-    rmse = math.sqrt(((pred["ACTUAL_CALLS"] - pred["PRED_CALLS"]) ** 2).mean())
+    beat_metrics = (
+        pred.groupby("BEAT")
+        .apply(lambda g: pd.Series({
+            "MAE": (g["ACTUAL_CALLS"] - g["PRED_CALLS"]).abs().mean(),
+            "RMSE": math.sqrt(((g["ACTUAL_CALLS"] - g["PRED_CALLS"]) ** 2).mean()),
+        }))
+        .reset_index()
+    )
 
-    return pred, {"MAE": float(mae), "RMSE": float(rmse), "test_days": int(test_days)}
+    filtered = pred[pred["BEAT"] != 521]
+    mae = (filtered["ACTUAL_CALLS"] - filtered["PRED_CALLS"]).abs().mean()
+    rmse = math.sqrt(((filtered["ACTUAL_CALLS"] - filtered["PRED_CALLS"]) ** 2).mean())
+
+    metrics = {
+        "MAE": float(mae),
+        "RMSE": float(rmse),
+        "test_days": int(test_days),
+        "excluded_beats": [521],
+        "beat_metrics": beat_metrics,
+    }
+
+    return pred, metrics
+
+def plot_beat_error_metrics(metrics):
+    '''
+    Plots the MAE and RSME per beat and flags the beat 521 as a outlier
+
+    Arguments:
+    metrics-- MAE and RMSE values produced by step3_baseline_forecast()
+
+    Returns:
+    N/A
+    '''
+    beat_metrics = metrics["beat_metrics"].copy()
+    normal = beat_metrics[beat_metrics["BEAT"] != 521]
+    outlier = beat_metrics[beat_metrics["BEAT"] == 521]
+
+    _, axes = plt.subplots(1, 2, figsize=(18, 6))
+    axes[0].bar(outlier["BEAT"].astype(str), outlier["MAE"], color="#d9534f", label="Outlier beat")
+    axes[0].annotate("Beat 521", xy=(str(521), outlier["MAE"].values[0]), ha='center', va='bottom', fontsize=8, color='#d9534f')
+    axes[0].bar(normal["BEAT"].astype(str), normal["MAE"], color="#5bc0de", label="Normal beat")
+    axes[0].legend()
+    axes[0].set_title("MAE per Beat")
+    axes[0].set_ylabel("MAE")
+    axes[0].set_xticks([])
+    axes[0].set_xlabel("Beats")
+
+    axes[1].bar(outlier["BEAT"].astype(str), outlier["RMSE"], color="#d9534f", label="Outlier beat")
+    axes[1].annotate("Beat 521", xy=(str(521), outlier["RMSE"].values[0]), ha='center', va='bottom', fontsize=8, color='#d9534f')
+    axes[1].bar(normal["BEAT"].astype(str), normal["RMSE"], color="#5bc0de", label="Normal beat")
+    axes[1].legend()
+    axes[1].set_title("RMSE per Beat")
+    axes[1].set_ylabel("RMSE")
+    axes[1].set_xticks([])
+    axes[1].set_xlabel("Beats")
+
+    plt.suptitle("Per-Beat Forecast Error — Test Window", fontsize=14)
+    plt.savefig("./data/01-processed/step3_beat_error_metrics.png", dpi=300, bbox_inches="tight")
+    plt.tight_layout()
+    plt.show()
+
+def plot_actual_vs_predicted(pred_df, top_n=3):
+    """
+    For the top N hotspot beats:
+      - Left panel:  Actual vs Predicted overlay with shaded error band
+      - Right panel: Residual bar chart
+
+    Arguments:
+    pred_df-- predictions from baseline forecasting
+    top_n-- number of top beats to plot
+
+    Returns:
+    N/A
+    """
+    beat_counts = pred_df.groupby("BEAT")["ACTUAL_CALLS"].sum().sort_values(ascending=False)
+    top_beats = list(beat_counts.head(top_n).index)
+ 
+    viz = pred_df[pred_df["BEAT"].isin(top_beats)].copy()
+    viz_agg = viz.groupby(["DATE", "BEAT"])[["ACTUAL_CALLS", "PRED_CALLS"]].sum().reset_index()
+    viz_agg["RESIDUAL"] = viz_agg["PRED_CALLS"] - viz_agg["ACTUAL_CALLS"]
+ 
+    palette = sns.color_palette("Set2", len(top_beats))
+    _, axes = plt.subplots(len(top_beats), 2, figsize=(16, 4 * len(top_beats)))
+ 
+    if len(top_beats) == 1:
+        axes = [axes]
+ 
+    for i, beat in enumerate(top_beats):
+        beat_data = viz_agg[viz_agg["BEAT"] == beat].sort_values("DATE")
+ 
+        ax = axes[i][0]
+        ax.plot(beat_data["DATE"], beat_data["ACTUAL_CALLS"], label="Actual", color=palette[i])
+        ax.plot(beat_data["DATE"], beat_data["PRED_CALLS"],   label="Predicted", color=palette[i], linestyle="--", alpha=0.7)
+        ax.fill_between(beat_data["DATE"], beat_data["ACTUAL_CALLS"], beat_data["PRED_CALLS"], alpha=0.15, color=palette[i])
+        ax.set_title(f"Beat {beat} - Actual vs Predicted")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Calls")
+        ax.tick_params(axis="x", rotation=45)
+        ax.legend()
+ 
+        ax2 = axes[i][1]
+        residual_colors = ["#d9534f" if r > 0 else "#5b8dd9" for r in beat_data["RESIDUAL"]]
+        ax2.bar(beat_data["DATE"], beat_data["RESIDUAL"], color=residual_colors, alpha=0.7)
+        ax2.axhline(0, color="black", linewidth=0.8, linestyle="--")
+        ax2.set_title(f"Beat {beat} - Residuals (Predicted - Actual)")
+        ax2.set_xlabel("Date")
+        ax2.set_ylabel("Residual")
+        ax2.tick_params(axis="x", rotation=45)
+ 
+        legend_elements = [
+            mpatches.Patch(facecolor="#d9534f", label="Overpredicted", alpha=0.7),
+            mpatches.Patch(facecolor="#5b8dd9", label="Underpredicted",alpha=0.7),
+        ]
+        ax2.legend(handles=legend_elements)
+ 
+    plt.suptitle(f"Forecast Accuracy — Top {top_n} Hotspot Beats, Test Window", fontsize=14, y=1.01)
+    plt.savefig("./data/01-processed/step3_actual_vs_predicted.png", dpi=300, bbox_inches="tight")
+    plt.tight_layout()
+    plt.show()
 
 
 def _allocate_proportional(demand_series, total_units):
@@ -318,31 +463,11 @@ def main():
     print("=" * 60)
     print("Generating visualizations...")
 
-    top_beats = list(beat_counts.head(3).index)
-    viz = pred_df[pred_df["BEAT"].isin(top_beats)].copy()
-    viz_agg = viz.groupby(["DATE", "BEAT"])[["ACTUAL_CALLS", "PRED_CALLS"]].sum().reset_index()
-    print(viz_agg.head())
+    plot_beat_error_metrics(metrics)
+    plot_actual_vs_predicted(pred_df)
 
-    # Plot 1: Actual calls
-    plt.figure(figsize=(12, 5))
-    sns.lineplot(data=viz_agg, x="DATE", y="ACTUAL_CALLS", hue="BEAT", legend=True)
-    plt.xticks(rotation=45)
-    plt.title("Step 3B: Actual calls (Top 3 hotspot beats, test window)")
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, "step3_actual_calls_top3.png"), dpi=150)
-    plt.close()
-
-    # Plot 2: Predicted calls
-    plt.figure(figsize=(12, 5))
-    sns.lineplot(data=viz_agg, x="DATE", y="PRED_CALLS", hue="BEAT", legend=True)
-    plt.xticks(rotation=45)
-    plt.title("Step 3B: Baseline predicted calls (Top 3 hotspot beats, test window)")
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, "step3_predicted_calls_top3.png"), dpi=150)
-    plt.close()
-
-    print(f"[OK] Saved: {os.path.join(OUT_DIR, 'step3_actual_calls_top3.png')}")
-    print(f"[OK] Saved: {os.path.join(OUT_DIR, 'step3_predicted_calls_top3.png')}")
+    print(f"Saved: {os.path.join(OUT_DIR, 'step3_beat_error_metrics.png')}")
+    print(f"Saved: {os.path.join(OUT_DIR, 'step3_actual_vs_predicted.png')}")
     print()
 
     print("Step 3 complete.")
