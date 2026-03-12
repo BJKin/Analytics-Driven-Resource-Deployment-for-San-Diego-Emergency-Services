@@ -251,7 +251,7 @@ def plot_beat_error_metrics(metrics):
     axes[1].set_xticks([])
     axes[1].set_xlabel("Beats")
 
-    plt.suptitle("Per-Beat Forecast Error — Test Window", fontsize=14)
+    plt.suptitle("Per-Beat Forecast Error - Test Window", fontsize=14)
     plt.savefig("./data/01-processed/step3_beat_error_metrics.png", dpi=300, bbox_inches="tight")
     plt.tight_layout()
     plt.show()
@@ -310,7 +310,7 @@ def plot_actual_vs_predicted(pred_df, top_n=3):
         ]
         ax2.legend(handles=legend_elements)
  
-    plt.suptitle(f"Forecast Accuracy — Top {top_n} Hotspot Beats, Test Window", fontsize=14, y=1.01)
+    plt.suptitle(f"Forecast Accuracy - Top {top_n} Hotspot Beats, Test Window", fontsize=14, y=1.01)
     plt.savefig("./data/01-processed/step3_actual_vs_predicted.png", dpi=300, bbox_inches="tight")
     plt.tight_layout()
     plt.show()
