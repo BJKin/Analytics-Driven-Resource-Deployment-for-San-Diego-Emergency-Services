@@ -2,7 +2,7 @@ from typing import Union
 from pathlib import Path
 import os
 import pandas as pd
-from step3_helper import add_high_risk_flag
+from step3_forecasting import add_high_risk_flag
 
 # ----------------------------
 # Initial cleaning (from raw CSV)

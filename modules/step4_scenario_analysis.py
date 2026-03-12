@@ -1,30 +1,8 @@
-
-#!/usr/bin/env python3
-"""
-Step 4 scenario analysis for the San Diego Emergency Services project.
-
-This script treats the existing Step 4 output as the base demand table and
-adds a lightweight scenario-analysis layer on top of it.
-
-Expected base allocation CSV columns (from current repo):
-    BEAT, AVG_CALLS, HIGH_RISK_RATIO, WEIGHTED_DEMAND, UNITS, SHIFT
-
-Expected hotspot CSV columns:
-    BEAT, CALLS
-
-Outputs:
-    - step4_scenario_allocations.csv
-    - step4_scenario_summary.csv
-    - scenario_coverage_ratio.png
-    - scenario_total_shortfall.png
-    - allocation_top_beats_<shift>.png
-"""
 from __future__ import annotations
 
 import argparse
-import math
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence, Set
+from typing import List, Sequence, Set
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -272,7 +250,7 @@ def plot_summary_bars(summary_df: pd.DataFrame, outdir: Path) -> None:
     plt.title("Scenario comparison: coverage ratio")
     plt.tight_layout()
     plt.savefig(outdir / "scenario_coverage_ratio.png", dpi=180)
-    plt.close()
+    plt.show()
 
     # total shortfall
     plt.figure(figsize=(9, 5))
@@ -282,7 +260,7 @@ def plot_summary_bars(summary_df: pd.DataFrame, outdir: Path) -> None:
     plt.title("Scenario comparison: total shortfall")
     plt.tight_layout()
     plt.savefig(outdir / "scenario_total_shortfall.png", dpi=180)
-    plt.close()
+    plt.show()
 
 
 def plot_top_beats_allocation(
@@ -321,7 +299,7 @@ def plot_top_beats_allocation(
     plt.legend()
     plt.tight_layout()
     plt.savefig(outdir / f"allocation_top_beats_{shift.lower()}.png", dpi=180)
-    plt.close()
+    plt.show()
 
 
 def parse_args() -> argparse.Namespace:

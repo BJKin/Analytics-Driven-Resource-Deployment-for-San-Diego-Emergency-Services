@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import geopandas as gpd
 
-from step3_helper import add_time_features
+from step3_forecasting import add_time_features
 
 #### Parameters ###
 OUT_DR = "./data/EDA_outputs/"
