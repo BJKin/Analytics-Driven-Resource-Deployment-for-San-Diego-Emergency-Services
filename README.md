@@ -6,6 +6,9 @@
 - `Seong Ha` - Hotspots & Baseline Forecasting, Resource Deployment Suggestion
 - `Hanyuan Zhang` - Hotspots & Baseline Forecasting, Resource Deployment Suggestion
 
+### Presentation
+- [Google Slides](https://docs.google.com/presentation/d/1fHMJgwVZvuU6pqp4ksIvkKsCGYIBBYOOiHqEbEdOmxo/edit?usp=sharing)
+
 ### Data Overview
 Dataset Name: Police Calls for Service 2025
 - Descriptions of any shortcomings: There are large amounts of missing fields in the primary address suffix column and primary address direction column.  This is likely due to many streets not having a suffix or direction, but this may cause complications for data analysis as entries with missing fields don't necessarily correlate to data that can be thrown out.  An even more extreme version of this can be seen in all columns corresponding to the intersecting address for a given incident as most include only the intersecting street name or completely exclude any intersecting data.
